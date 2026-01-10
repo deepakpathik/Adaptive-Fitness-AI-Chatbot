@@ -18,4 +18,16 @@ model Message {
   role String
   content String
   createdAt DateTime @default(now())
+  userId String
+  user User @relation(fields: [userId], references: [id])
+}
+
+model User {
+  id String @id @default(uuid())
+  name String
+  email String @unique
+  createdAt DateTime @default(now())
+  personality String? // Encouragement Seeker, Creative Explorer, Goal Finisher
+  usageDays Int @default(0)
+  messages Message[]
 }
