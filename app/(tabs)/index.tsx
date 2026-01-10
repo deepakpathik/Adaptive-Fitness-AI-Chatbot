@@ -42,9 +42,9 @@ export default function HomeScreen() {
 
         <TouchableOpacity
           style={styles.button}
-          onPress={() => router.push('/onboarding')} // Navigate to onboarding (will create next)
+          onPress={() => router.push('/modal')}
         >
-          <ThemedText style={styles.buttonText}>Start Chat</ThemedText>
+          <ThemedText style={styles.buttonText}>Get Started</ThemedText>
         </TouchableOpacity>
       </ThemedView>
     </SafeAreaView>
