@@ -64,7 +64,7 @@ export default function HomeScreen() {
               </View>
               <View style={styles.textContainer}>
                 <Text style={styles.title}>Ready to Crush It,{'\n'}Athlete?</Text>
-                <Text style={styles.subtitle}>Your adaptive, goal-oriented AI coach is here.</Text>
+                <TypewriterText text="Your adaptive, goal-oriented AI coach is here." />
               </View>
             </View>
 
@@ -122,6 +122,23 @@ export default function HomeScreen() {
     </View>
   );
 }
+
+const TypewriterText = ({ text }: { text: string }) => {
+  const [displayedText, setDisplayedText] = React.useState('');
+  const [currentIndex, setCurrentIndex] = React.useState(0);
+
+  React.useEffect(() => {
+    if (currentIndex < text.length) {
+      const timeout = setTimeout(() => {
+        setDisplayedText(prev => prev + text[currentIndex]);
+        setCurrentIndex(prev => prev + 1);
+      }, 50); // Speed of typing
+      return () => clearTimeout(timeout);
+    }
+  }, [currentIndex, text]);
+
+  return <Text style={styles.subtitle}>{displayedText}</Text>;
+};
 
 const FeatureCard = ({ icon, title, desc }: { icon: any, title: string, desc: string }) => (
   <BlurView intensity={20} tint="light" style={styles.card}>
@@ -193,9 +210,11 @@ const styles = StyleSheet.create({
     color: '#E0E0E0',
     textAlign: 'center',
     maxWidth: '95%',
-    lineHeight: 18,
+    lineHeight: 20,
     fontWeight: '500',
     opacity: 0.9,
+    marginTop: 8, // Shift downwards
+    minHeight: 20, // Prevent layout jump
   },
   grid: {
     flexDirection: 'row',
