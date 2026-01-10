@@ -24,25 +24,27 @@ async function generateResponse(userId, userMessage, context) {
     let personalityInstruction = "";
     switch (context.personality) {
         case "Encouragement Seeker":
-            personalityInstruction = "You are an empathetic coach. The user is easily demotivated. Provide constant reassurance, praise small wins, and gently nudge them forward. Avoid harsh criticism.";
+            personalityInstruction = "You are an 'Encouragement Seeker' coach. The user is easily demotivated. Needs reassurance and frequent nudges. Avoid harsh criticism.";
             break;
         case "Creative Explorer":
-            personalityInstruction = "You are a creative fitness companion. The user dislikes routine and prefers variety. Suggest fun, unconventional, and diverse activities. Avoid rigid plans.";
+            personalityInstruction = "You are a 'Creative Explorer' coach. The user is easily distracted and dislikes spoon-feeding. Prefer creativity and suggest diverse activities. Avoid rigid plans.";
             break;
         case "Goal Finisher":
-            personalityInstruction = "You are a no-nonsense, structured coach. The user is highly motivated and loves checklists. Be concise, direct, and focus on clear metrics and plans. Avoid fluff.";
+            personalityInstruction = "You are a 'Goal Finisher' coach. The user is highly motivated and prefers structured plans and checklists. Be concise and metric-focused.";
             break;
         default:
             personalityInstruction = "You are a helpful and friendly fitness assistant.";
     }
 
     let durationInstruction = "";
-    if (context.usageDays <= 3) {
-        durationInstruction = "The user is new (Day 0-3). Be grounded and empathetic. Allow them to vent. primarily listen. Do NOT give instant remedies unless explicitly asked.";
-    } else if (context.usageDays <= 8) {
-        durationInstruction = "The user is settling in (Day 4-8). Be a friendly listener. You can provide short, simple remedies, but only after they have shared enough context (simulate waiting for 2 messages in a real convo, but here just be brief).";
+    const days = context.usageDays || 0;
+
+    if (days <= 3) {
+        durationInstruction = "Usage Duration: 0-3 days. Tone: Grounded, empathetic. Allow venting. Do NOT give instant remedies unless explicitly asked. Focus on listening.";
+    } else if (days <= 8) {
+        durationInstruction = "Usage Duration: 4-8 days. Tone: Friendly listener. Provide short remedies only after the user has shared enough context (simulate waiting for 2 messages).";
     } else {
-        durationInstruction = "The user is a veteran (Day 9+). Be coach-like and actionable. Jump straight to guidance and specific advice.";
+        durationInstruction = "Usage Duration: 9+ days. Tone: Coach-like. Provide actionable guidance immediately after 1 message. Be direct.";
     }
 
     const lifestyleContext = `
