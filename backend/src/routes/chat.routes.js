@@ -7,19 +7,24 @@ const prisma = new PrismaClient();
 
 router.post('/', async (req, res) => {
     try {
-        const { userId, message, lifestyle } = req.body;
+        const { userId, message, lifestyle, personality } = req.body;
 
         if (!userId || !message) {
             return res.status(400).json({ error: 'Missing userId or message' });
         }
 
-        const user = await prisma.user.findUnique({
+        // Upsert user to ensure they exist and have the latest personality
+        const user = await prisma.user.upsert({
             where: { id: userId },
+            update: {
+                personality: personality || undefined, // Update personality if provided
+            },
+            create: {
+                id: userId,
+                personality: personality || 'Encouragement Seeker',
+                usageDays: 1,
+            },
         });
-
-        if (!user) {
-            return res.status(404).json({ error: 'User not found' });
-        }
 
         const now = new Date();
         const createdAt = new Date(user.createdAt);

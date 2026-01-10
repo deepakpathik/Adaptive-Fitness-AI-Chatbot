@@ -54,8 +54,9 @@ export default function ChatScreen() {
     try {
       const distinctId = await getOrCreateDistinctId();
       const lifestyle = await getLifestyleData();
+      const personality = await AsyncStorage.getItem('userPersonality') || 'Encouragement Seeker'; // Default fall back
 
-      const response = await ChatService.sendMessage(distinctId, userMsg.content, lifestyle);
+      const response = await ChatService.sendMessage(distinctId, userMsg.content, lifestyle, personality);
 
       const aiMsg: Message = {
         id: (Date.now() + 1).toString(),
