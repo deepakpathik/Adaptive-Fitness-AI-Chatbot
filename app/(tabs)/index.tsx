@@ -1,98 +1,124 @@
-import { Image } from 'expo-image';
-import { Platform, StyleSheet } from 'react-native';
 
-import { HelloWave } from '@/components/hello-wave';
-import ParallaxScrollView from '@/components/parallax-scroll-view';
 import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
-import { Link } from 'expo-router';
+import { IconSymbol } from '@/components/ui/icon-symbol';
+import { useRouter } from 'expo-router'; // Use expo-router hook
+import { StyleSheet, TouchableOpacity, View } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 
 export default function HomeScreen() {
-  return (
-    <ParallaxScrollView
-      headerBackgroundColor={{ light: '#A1CEDC', dark: '#1D3D47' }}
-      headerImage={
-        <Image
-          source={require('@/assets/images/partial-react-logo.png')}
-          style={styles.reactLogo}
-        />
-      }>
-      <ThemedView style={styles.titleContainer}>
-        <ThemedText type="title">Welcome!</ThemedText>
-        <HelloWave />
-      </ThemedView>
-      <ThemedView style={styles.stepContainer}>
-        <ThemedText type="subtitle">Step 1: Try it</ThemedText>
-        <ThemedText>
-          Edit <ThemedText type="defaultSemiBold">app/(tabs)/index.tsx</ThemedText> to see changes.
-          Press{' '}
-          <ThemedText type="defaultSemiBold">
-            {Platform.select({
-              ios: 'cmd + d',
-              android: 'cmd + m',
-              web: 'F12',
-            })}
-          </ThemedText>{' '}
-          to open developer tools.
-        </ThemedText>
-      </ThemedView>
-      <ThemedView style={styles.stepContainer}>
-        <Link href="/modal">
-          <Link.Trigger>
-            <ThemedText type="subtitle">Step 2: Explore</ThemedText>
-          </Link.Trigger>
-          <Link.Preview />
-          <Link.Menu>
-            <Link.MenuAction title="Action" icon="cube" onPress={() => alert('Action pressed')} />
-            <Link.MenuAction
-              title="Share"
-              icon="square.and.arrow.up"
-              onPress={() => alert('Share pressed')}
-            />
-            <Link.Menu title="More" icon="ellipsis">
-              <Link.MenuAction
-                title="Delete"
-                icon="trash"
-                destructive
-                onPress={() => alert('Delete pressed')}
-              />
-            </Link.Menu>
-          </Link.Menu>
-        </Link>
+  const router = useRouter();
 
-        <ThemedText>
-          {`Tap the Explore tab to learn more about what's included in this starter app.`}
+  return (
+    <SafeAreaView style={styles.container}>
+      <ThemedView style={styles.content}>
+        <ThemedText type="title" style={styles.title}>Adaptive Fitness AI</ThemedText>
+        <ThemedText style={styles.subtitle}>
+          Your personal AI coach that adapts to your personality and lifestyle.
         </ThemedText>
+
+        <View style={styles.infoContainer}>
+          <ThemedText type="subtitle" style={styles.sectionTitle}>I can help with:</ThemedText>
+          <View style={styles.bulletPoint}>
+            <IconSymbol name="checkmark.circle.fill" size={20} color="#4CAF50" />
+            <ThemedText style={styles.bulletText}>Personalized workout plans</ThemedText>
+          </View>
+          <View style={styles.bulletPoint}>
+            <IconSymbol name="checkmark.circle.fill" size={20} color="#4CAF50" />
+            <ThemedText style={styles.bulletText}>Wellness & habit guidance</ThemedText>
+          </View>
+          <View style={styles.bulletPoint}>
+            <IconSymbol name="checkmark.circle.fill" size={20} color="#4CAF50" />
+            <ThemedText style={styles.bulletText}>Motivation & accountability</ThemedText>
+          </View>
+        </View>
+
+        <View style={styles.warningContainer}>
+          <ThemedText type="subtitle" style={styles.warningTitle}>⚠️ Important Note:</ThemedText>
+          <ThemedText style={styles.warningText}>
+            I cannot provide medical advice, diagnosis, or treatment for injuries or diseases.
+          </ThemedText>
+        </View>
+
+        <TouchableOpacity
+          style={styles.button}
+          onPress={() => router.push('/onboarding')} // Navigate to onboarding (will create next)
+        >
+          <ThemedText style={styles.buttonText}>Start Chat</ThemedText>
+        </TouchableOpacity>
       </ThemedView>
-      <ThemedView style={styles.stepContainer}>
-        <ThemedText type="subtitle">Step 3: Get a fresh start</ThemedText>
-        <ThemedText>
-          {`When you're ready, run `}
-          <ThemedText type="defaultSemiBold">npm run reset-project</ThemedText> to get a fresh{' '}
-          <ThemedText type="defaultSemiBold">app</ThemedText> directory. This will move the current{' '}
-          <ThemedText type="defaultSemiBold">app</ThemedText> to{' '}
-          <ThemedText type="defaultSemiBold">app-example</ThemedText>.
-        </ThemedText>
-      </ThemedView>
-    </ParallaxScrollView>
+    </SafeAreaView>
   );
 }
 
 const styles = StyleSheet.create({
-  titleContainer: {
+  container: {
+    flex: 1,
+    backgroundColor: '#fff',
+  },
+  content: {
+    flex: 1,
+    padding: 24,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  title: {
+    fontSize: 28,
+    textAlign: 'center',
+    marginBottom: 12,
+  },
+  subtitle: {
+    fontSize: 16,
+    textAlign: 'center',
+    marginBottom: 40,
+    color: '#666',
+  },
+  infoContainer: {
+    width: '100%',
+    marginBottom: 30,
+    paddingHorizontal: 10,
+  },
+  sectionTitle: {
+    marginBottom: 12,
+  },
+  bulletPoint: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 8,
-  },
-  stepContainer: {
-    gap: 8,
     marginBottom: 8,
+    gap: 10,
   },
-  reactLogo: {
-    height: 178,
-    width: 290,
-    bottom: 0,
-    left: 0,
-    position: 'absolute',
+  bulletText: {
+    fontSize: 16,
+  },
+  warningContainer: {
+    backgroundColor: '#FFF3CD',
+    padding: 16,
+    borderRadius: 12,
+    marginBottom: 40,
+    width: '100%',
+    borderLeftWidth: 4,
+    borderLeftColor: '#FFC107',
+  },
+  warningTitle: {
+    fontSize: 16,
+    marginBottom: 4,
+    color: '#856404',
+  },
+  warningText: {
+    fontSize: 14,
+    color: '#856404',
+  },
+  button: {
+    backgroundColor: '#007AFF',
+    paddingVertical: 16,
+    paddingHorizontal: 48,
+    borderRadius: 30,
+    width: '100%',
+    alignItems: 'center',
+  },
+  buttonText: {
+    color: '#fff',
+    fontSize: 18,
+    fontWeight: 'bold',
   },
 });
