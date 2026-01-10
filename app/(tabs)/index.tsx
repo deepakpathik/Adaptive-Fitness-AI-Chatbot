@@ -1,124 +1,294 @@
-
-import { ThemedText } from '@/components/themed-text';
-import { ThemedView } from '@/components/themed-view';
-import { IconSymbol } from '@/components/ui/icon-symbol';
-import { useRouter } from 'expo-router'; // Use expo-router hook
-import { StyleSheet, TouchableOpacity, View } from 'react-native';
+import { Ionicons } from '@expo/vector-icons';
+import { LinearGradient } from 'expo-linear-gradient';
+import { useRouter } from 'expo-router';
+import { StatusBar } from 'expo-status-bar';
+import React from 'react';
+import { Animated, ImageBackground, ScrollView, StyleSheet, TouchableOpacity, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 export default function HomeScreen() {
   const router = useRouter();
 
+  // Animation for the sprinter to make it look "in motion" (subtle horizontal drift/vibration)
+  const translateX = React.useRef(new Animated.Value(0)).current;
+
+  React.useEffect(() => {
+    Animated.loop(
+      Animated.sequence([
+        Animated.timing(translateX, {
+          toValue: 5,
+          duration: 800,
+          useNativeDriver: true,
+        }),
+        Animated.timing(translateX, {
+          toValue: -5,
+          duration: 800,
+          useNativeDriver: true,
+        }),
+        Animated.timing(translateX, {
+          toValue: 0,
+          duration: 800,
+          useNativeDriver: true,
+        }),
+      ])
+    ).start();
+  }, []);
+
   return (
-    <SafeAreaView style={styles.container}>
-      <ThemedView style={styles.content}>
-        <ThemedText type="title" style={styles.title}>Adaptive Fitness AI</ThemedText>
-        <ThemedText style={styles.subtitle}>
-          Your personal AI coach that adapts to your personality and lifestyle.
-        </ThemedText>
+    <View style={styles.container}>
+      <StatusBar style="light" />
+      <ImageBackground
+        source={require('@/assets/images/app_bg.png')}
+        style={styles.background}
+        resizeMode="cover"
+      >
+        <LinearGradient
+          colors={['rgba(0,0,0,0.3)', 'rgba(0,0,0,0.8)']}
+          style={styles.overlay}
+        />
 
-        <View style={styles.infoContainer}>
-          <ThemedText type="subtitle" style={styles.sectionTitle}>I can help with:</ThemedText>
-          <View style={styles.bulletPoint}>
-            <IconSymbol name="checkmark.circle.fill" size={20} color="#4CAF50" />
-            <ThemedText style={styles.bulletText}>Personalized workout plans</ThemedText>
-          </View>
-          <View style={styles.bulletPoint}>
-            <IconSymbol name="checkmark.circle.fill" size={20} color="#4CAF50" />
-            <ThemedText style={styles.bulletText}>Wellness & habit guidance</ThemedText>
-          </View>
-          <View style={styles.bulletPoint}>
-            <IconSymbol name="checkmark.circle.fill" size={20} color="#4CAF50" />
-            <ThemedText style={styles.bulletText}>Motivation & accountability</ThemedText>
-          </View>
-        </View>
+        <SafeAreaView style={styles.safeArea}>
+          <ScrollView contentContainerStyle={styles.content}>
 
-        <View style={styles.warningContainer}>
-          <ThemedText type="subtitle" style={styles.warningTitle}>⚠️ Important Note:</ThemedText>
-          <ThemedText style={styles.warningText}>
-            I cannot provide medical advice, diagnosis, or treatment for injuries or diseases.
-          </ThemedText>
-        </View>
+            {/* Header Section */}
+            <View style={styles.header}>
+              <View style={styles.iconContainer}>
+                <Animated.Image
+                  source={require('@/assets/images/sprinter.png')}
+                  style={[
+                    styles.sprinterIcon,
+                    { transform: [{ skewX: '-10deg' }, { translateX }] }
+                  ]}
+                  resizeMode="contain"
+                />
+              </View>
+              <View style={styles.textContainer}>
+                <Text style={styles.title}>Ready to Crush It,{'\n'}Athlete?</Text>
+                <Text style={styles.subtitle}>Your adaptive, goal-oriented AI coach is here.</Text>
+              </View>
+            </View>
 
-        <TouchableOpacity
-          style={styles.button}
-          onPress={() => router.push('/modal')}
-        >
-          <ThemedText style={styles.buttonText}>Get Started</ThemedText>
-        </TouchableOpacity>
-      </ThemedView>
-    </SafeAreaView>
+            {/* Feature Grid */}
+            <View style={styles.grid}>
+              <FeatureCard
+                icon="barbell-outline"
+                title="Personalized Plans"
+                desc="Tailored for your goals."
+              />
+              <FeatureCard
+                icon="bulb-outline"
+                title="Smart Coaching"
+                desc="Adapts to your progress."
+              />
+              <FeatureCard
+                icon="trending-up-outline"
+                title="Progress Insights"
+                desc="Visualize your gains."
+              />
+              <FeatureCard
+                icon="heart-outline"
+                title="Wellness & Recovery"
+                desc="Balance rest and work."
+              />
+            </View>
+
+            {/* Bottom Footer Section */}
+            <View style={styles.bottomSection}>
+              {/* Disclaimer */}
+              <View style={styles.disclaimerContainer}>
+                <Ionicons name="information-circle-outline" size={22} color="#FFD700" style={{ marginRight: 8 }} />
+                <Text style={styles.disclaimerText}>
+                  Note: I’m here to help with fitness and wellness guidance only. I can’t help with medical conditions, injuries, or medications. Please reach out to a healthcare professional for those needs.
+                </Text>
+              </View>
+
+              {/* CTA Button */}
+              <TouchableOpacity
+                style={styles.buttonContainer}
+                onPress={() => router.push('/modal')}
+                activeOpacity={0.8}
+              >
+                <LinearGradient
+                  colors={['#4c669f', '#3b5998', '#192f6a']}
+                  start={{ x: 0, y: 0 }}
+                  end={{ x: 1, y: 0 }}
+                  style={styles.button}
+                >
+                  <Text style={styles.buttonText}>Get Started</Text>
+                  <Ionicons name="arrow-forward" size={20} color="#FFF" />
+                </LinearGradient>
+              </TouchableOpacity>
+            </View>
+
+          </ScrollView>
+        </SafeAreaView>
+      </ImageBackground>
+    </View>
   );
 }
+
+const FeatureCard = ({ icon, title, desc }: { icon: any, title: string, desc: string }) => (
+  <View style={styles.card}>
+    <LinearGradient
+      colors={['rgba(255,255,255,0.1)', 'rgba(255,255,255,0.05)']}
+      style={styles.cardGradient}
+    />
+    <View style={styles.cardIconBox}>
+      <Ionicons name={icon} size={24} color="#FFD700" />
+    </View>
+    <Text style={styles.cardTitle}>{title}</Text>
+    <Text style={styles.cardDesc}>{desc}</Text>
+  </View>
+);
+
+import { Text } from 'react-native'; // Import Text separately for custom styles
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#fff',
+    backgroundColor: '#000',
+  },
+  background: {
+    flex: 1,
+  },
+  overlay: {
+    ...StyleSheet.absoluteFillObject,
+  },
+  safeArea: {
+    flex: 1,
   },
   content: {
-    flex: 1,
-    padding: 24,
+    paddingHorizontal: 20,
+    paddingTop: 10, // minimized top padding
+    paddingBottom: 20,
+    flexGrow: 1,
+    justifyContent: 'space-between',
+  },
+  header: {
+    alignItems: 'center',
+    marginTop: 0,
+    marginBottom: 5,
+  },
+  iconContainer: {
+    width: '100%',
+    height: 220, // Enlarged from 160
     justifyContent: 'center',
+    alignItems: 'center',
+    marginBottom: 0,
+  },
+  sprinterIcon: {
+    width: '100%',
+    height: '100%',
+    transform: [{ skewX: '-10deg' }], // Static "speed" skew
+  },
+  textContainer: {
     alignItems: 'center',
   },
   title: {
-    fontSize: 28,
+    fontSize: 28, // Reduced from 34 to save space
+    fontWeight: '900',
+    color: '#FFFFFF',
     textAlign: 'center',
-    marginBottom: 12,
+    marginBottom: 12, // Increased spacing to shift subtitle down
+    lineHeight: 32,
+    letterSpacing: 0.5,
+    textShadowColor: 'rgba(0, 0, 0, 0.5)',
+    textShadowOffset: { width: 0, height: 2 },
+    textShadowRadius: 4,
   },
   subtitle: {
-    fontSize: 16,
+    fontSize: 14, // Reduced from 17
+    color: '#E0E0E0',
     textAlign: 'center',
-    marginBottom: 40,
-    color: '#666',
+    maxWidth: '95%',
+    lineHeight: 18,
+    fontWeight: '500',
+    opacity: 0.9,
   },
-  infoContainer: {
-    width: '100%',
-    marginBottom: 30,
-    paddingHorizontal: 10,
-  },
-  sectionTitle: {
-    marginBottom: 12,
-  },
-  bulletPoint: {
+  grid: {
     flexDirection: 'row',
-    alignItems: 'center',
-    marginBottom: 8,
-    gap: 10,
+    flexWrap: 'wrap',
+    gap: 10, // Reduced gap
+    justifyContent: 'center',
+    marginBottom: 5,
+    flex: 1,
+    alignContent: 'center',
   },
-  bulletText: {
-    fontSize: 16,
+  card: {
+    width: '48%',
+    borderRadius: 16,
+    paddingVertical: 12, // Reduced from 20 to fit screen
+    paddingHorizontal: 10,
+    overflow: 'hidden',
+    borderWidth: 1,
+    borderColor: 'rgba(255,255,255,0.15)',
+    backgroundColor: 'rgba(255,255,255,0.03)',
+    justifyContent: 'center',
   },
-  warningContainer: {
-    backgroundColor: '#FFF3CD',
-    padding: 16,
-    borderRadius: 12,
-    marginBottom: 40,
+  cardGradient: {
+    ...StyleSheet.absoluteFillObject,
+    opacity: 0.8,
+  },
+  cardIconBox: {
+    marginBottom: 6,
+    backgroundColor: 'rgba(255,215,0,0.1)',
+    alignSelf: 'flex-start',
+    padding: 6,
+    borderRadius: 10,
+  },
+  cardTitle: {
+    fontSize: 13,
+    fontWeight: '700',
+    color: '#FFF',
+    marginBottom: 2,
+    letterSpacing: 0.3,
+  },
+  cardDesc: {
+    fontSize: 11,
+    color: '#CCCCCC',
+    lineHeight: 14,
+    fontWeight: '400',
+  },
+  bottomSection: {
     width: '100%',
-    borderLeftWidth: 4,
-    borderLeftColor: '#FFC107',
+    marginTop: 'auto',
+    gap: 8,
   },
-  warningTitle: {
-    fontSize: 16,
-    marginBottom: 4,
-    color: '#856404',
+  disclaimerContainer: {
+    flexDirection: 'row',
+    backgroundColor: 'rgba(0,0,0,0.4)',
+    padding: 8, // Reduced padding
+    borderRadius: 12,
+    alignItems: 'center',
+    borderWidth: 1,
+    borderColor: 'rgba(255,255,255,0.05)',
   },
-  warningText: {
-    fontSize: 14,
-    color: '#856404',
+  disclaimerText: {
+    color: '#FFD700',
+    fontSize: 11,
+    flex: 1,
+    lineHeight: 14,
+  },
+  buttonContainer: {
+    width: '100%',
+    shadowColor: '#4c669f',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.5,
+    shadowRadius: 12,
+    marginBottom: 0,
   },
   button: {
-    backgroundColor: '#007AFF',
     paddingVertical: 16,
-    paddingHorizontal: 48,
     borderRadius: 30,
-    width: '100%',
+    flexDirection: 'row',
+    justifyContent: 'center',
     alignItems: 'center',
+    gap: 10,
   },
   buttonText: {
-    color: '#fff',
+    color: '#FFF',
     fontSize: 18,
-    fontWeight: 'bold',
+    fontWeight: '700',
+    letterSpacing: 0.5,
   },
 });

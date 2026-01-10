@@ -1,8 +1,18 @@
-
-import { ThemedText } from '@/components/themed-text';
-import { IconSymbol } from '@/components/ui/icon-symbol';
-import { useEffect, useRef, useState } from 'react';
-import { ActivityIndicator, FlatList, KeyboardAvoidingView, Platform, StyleSheet, TextInput, TouchableOpacity, View } from 'react-native';
+import { ChatService } from '@/services/api';
+import { Ionicons } from '@expo/vector-icons';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import React, { useEffect, useRef, useState } from 'react';
+import {
+  ActivityIndicator,
+  FlatList,
+  KeyboardAvoidingView,
+  Platform,
+  StyleSheet,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  View
+} from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 interface Message {
@@ -32,18 +42,56 @@ export default function ChatScreen() {
     setInputText('');
     setLoading(true);
 
-    setTimeout(() => {
+    try {
+      const distinctId = await getOrCreateDistinctId();
+      const lifestyle = await getLifestyleData();
+
+      console.log('Sending message:', userMsg.content);
+      const response = await ChatService.sendMessage(distinctId, userMsg.content, lifestyle);
+
       const aiMsg: Message = {
         id: (Date.now() + 1).toString(),
         role: 'ai',
-        content: "This is a mock AI response. I will be connected to the real backend soon!",
+        content: response.reply,
       };
       setMessages(prev => [...prev, aiMsg]);
+    } catch (error) {
+      console.error('Send Error:', error);
+      const errorMsg: Message = {
+        id: (Date.now() + 1).toString(),
+        role: 'ai',
+        content: "Sorry, I'm having trouble connecting to the server. Please try again.",
+      };
+      setMessages(prev => [...prev, errorMsg]);
+    } finally {
       setLoading(false);
-    }, 1500);
+    }
+  };
+
+  const getOrCreateDistinctId = async () => {
+    try {
+      let distinctId = await AsyncStorage.getItem('distinctId');
+      if (!distinctId) {
+        distinctId = Math.random().toString(36).substring(7);
+        await AsyncStorage.setItem('distinctId', distinctId);
+      }
+      return distinctId;
+    } catch (e) {
+      return 'user-' + Date.now();
+    }
+  };
+
+  const getLifestyleData = async () => {
+    try {
+      const lifestyleString = await AsyncStorage.getItem('lifestyleData');
+      return lifestyleString ? JSON.parse(lifestyleString) : {};
+    } catch (e) {
+      return {};
+    }
   };
 
   useEffect(() => {
+    // Scroll to bottom when messages change
     setTimeout(() => flatListRef.current?.scrollToEnd({ animated: true }), 100);
   }, [messages]);
 
@@ -54,70 +102,64 @@ export default function ChatScreen() {
         styles.messageBubble,
         isUser ? styles.userBubble : styles.aiBubble
       ]}>
-        <ThemedText style={[styles.messageText, isUser && styles.userMessageText]}>
+        <Text style={[styles.messageText, isUser && styles.userMessageText]}>
           {item.content}
-        </ThemedText>
+        </Text>
       </View>
     );
   };
 
   return (
-    <SafeAreaView style={styles.container}>
+    <SafeAreaView style={styles.container} edges={['top', 'left', 'right']}>
+      {/* Header */}
       <View style={styles.header}>
-        <ThemedText type="title" style={styles.headerTitle}>Fitness Coach</ThemedText>
+        <Text style={styles.headerTitle}>Fitness Coach</Text>
       </View>
 
-      <KeyboardSafeView style={styles.keyboardContainer}>
+      {/* Main Chat Area */}
+      <KeyboardAvoidingView
+        style={styles.keyboardContainer}
+        behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+        keyboardVerticalOffset={Platform.OS === 'ios' ? 0 : 0}
+      >
         <FlatList
           ref={flatListRef}
           data={messages}
           keyExtractor={item => item.id}
           renderItem={renderMessage}
           contentContainerStyle={styles.chatListContent}
-          style={styles.chatList}
           keyboardShouldPersistTaps="handled"
         />
 
         {loading && (
           <View style={styles.loadingContainer}>
             <ActivityIndicator size="small" color="#007AFF" />
-            <ThemedText style={styles.loadingText}>Typing...</ThemedText>
+            <Text style={styles.loadingText}>Typing...</Text>
           </View>
         )}
 
+        {/* Input Bar */}
         <View style={styles.inputWrapper}>
-          <View style={styles.inputContainer}>
-            <TextInput
-              style={styles.input}
-              placeholder="Ask about workouts, diet, motivation..."
-              placeholderTextColor="#999"
-              value={inputText}
-              onChangeText={setInputText}
-              multiline
-            />
-            <TouchableOpacity
-              style={[styles.sendButton, !inputText.trim() && styles.disabledSend]}
-              onPress={sendMessage}
-              disabled={!inputText.trim() || loading}
-            >
-              <IconSymbol name="arrow.up.circle.fill" size={32} color={inputText.trim() ? "#007AFF" : "#ccc"} />
-            </TouchableOpacity>
-          </View>
+          <TextInput
+            style={styles.input}
+            placeholder="Ask about workouts..."
+            placeholderTextColor="#999"
+            value={inputText}
+            onChangeText={setInputText}
+            multiline
+            returnKeyType="default"
+          />
+          <TouchableOpacity
+            style={[styles.sendButton, (!inputText.trim() || loading) && styles.disabledSend]}
+            onPress={sendMessage}
+            disabled={!inputText.trim() || loading}
+          >
+            <Ionicons name="send" size={24} color={inputText.trim() ? "#007AFF" : "#CCC"} />
+          </TouchableOpacity>
         </View>
-      </KeyboardSafeView>
+      </KeyboardAvoidingView>
     </SafeAreaView>
   );
-}
-
-function KeyboardSafeView({ children, style }: { children: React.ReactNode, style?: any }) {
-  if (Platform.OS === 'ios') {
-    return (
-      <KeyboardAvoidingView style={style} behavior="padding">
-        {children}
-      </KeyboardAvoidingView>
-    );
-  }
-  return <View style={style}>{children}</View>;
 }
 
 const styles = StyleSheet.create({
@@ -126,27 +168,25 @@ const styles = StyleSheet.create({
     backgroundColor: '#fff',
   },
   header: {
-    padding: 16,
+    height: 50,
     borderBottomWidth: 1,
     borderBottomColor: '#eee',
+    justifyContent: 'center',
     alignItems: 'center',
     backgroundColor: '#fff',
-    zIndex: 10,
   },
   headerTitle: {
-    fontSize: 20,
+    fontSize: 18,
     fontWeight: 'bold',
     color: '#000',
   },
   keyboardContainer: {
     flex: 1,
   },
-  chatList: {
-    flex: 1,
-  },
   chatListContent: {
     padding: 16,
     paddingBottom: 20,
+    flexGrow: 1,
   },
   messageBubble: {
     padding: 12,
@@ -184,14 +224,12 @@ const styles = StyleSheet.create({
     fontSize: 12,
   },
   inputWrapper: {
-    backgroundColor: '#fff',
-    borderTopWidth: 1,
-    borderTopColor: '#eee',
-  },
-  inputContainer: {
     flexDirection: 'row',
     alignItems: 'center',
-    padding: 12,
+    padding: 10,
+    borderTopWidth: 1,
+    borderTopColor: '#eee',
+    backgroundColor: '#fff',
   },
   input: {
     flex: 1,
@@ -204,7 +242,9 @@ const styles = StyleSheet.create({
     color: '#000',
   },
   sendButton: {
-    marginLeft: 8,
+    marginLeft: 10,
+    justifyContent: 'center',
+    alignItems: 'center',
   },
   disabledSend: {
     opacity: 0.5,

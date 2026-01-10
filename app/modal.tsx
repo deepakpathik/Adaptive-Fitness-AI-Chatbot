@@ -1,11 +1,11 @@
 
 import { ThemedText } from '@/components/themed-text';
-import { ThemedView } from '@/components/themed-view';
 import { IconSymbol } from '@/components/ui/icon-symbol';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { LinearGradient } from 'expo-linear-gradient';
 import { useRouter } from 'expo-router';
 import { useState } from 'react';
-import { ScrollView, StyleSheet, TouchableOpacity, View } from 'react-native';
+import { ImageBackground, ScrollView, StyleSheet, TouchableOpacity, View } from 'react-native';
 
 const PERSONALITIES = [
   {
@@ -52,92 +52,128 @@ export default function OnboardingScreen() {
   };
 
   return (
-    <ThemedView style={styles.container}>
-      <ScrollView contentContainerStyle={styles.scrollContent}>
-        <ThemedText type="title" style={styles.header}>Choose Your Coach</ThemedText>
-        <ThemedText style={styles.subHeader}>
-          Select the personality that motivates you the best.
-        </ThemedText>
+    <View style={styles.container}>
+      <ImageBackground
+        source={require('@/assets/images/app_bg.png')}
+        style={styles.background}
+        resizeMode="cover"
+      >
+        <LinearGradient
+          colors={['rgba(0,0,0,0.3)', 'rgba(0,0,0,0.8)']}
+          style={styles.overlay}
+        />
+        <ScrollView contentContainerStyle={styles.scrollContent}>
+          <ThemedText type="title" style={styles.header}>Choose Your Coach</ThemedText>
+          <ThemedText style={styles.subHeader}>
+            Select the personality that motivates you the best.
+          </ThemedText>
 
-        <View style={styles.cardsContainer}>
-          {PERSONALITIES.map((persona) => (
-            <TouchableOpacity
-              key={persona.id}
-              style={[
-                styles.card,
-                selectedId === persona.id && styles.selectedCard,
-              ]}
-              onPress={() => setSelectedId(persona.id)}
-            >
-              <View style={styles.cardHeader}>
-                <IconSymbol
-                  name={persona.icon as any}
-                  size={24}
-                  color={selectedId === persona.id ? '#fff' : '#007AFF'}
-                />
-                <ThemedText type="subtitle" style={[
-                  styles.cardTitle,
-                  selectedId === persona.id && styles.selectedText
+          <View style={styles.cardsContainer}>
+            {PERSONALITIES.map((persona) => (
+              <TouchableOpacity
+                key={persona.id}
+                style={[
+                  styles.card,
+                  selectedId === persona.id && styles.selectedCard,
+                ]}
+                onPress={() => setSelectedId(persona.id)}
+              >
+                <View style={styles.cardHeader}>
+                  <IconSymbol
+                    name={persona.icon as any}
+                    size={28}
+                    color={selectedId === persona.id ? '#007AFF' : '#555'}
+                  />
+                  <ThemedText type="subtitle" style={[
+                    styles.cardTitle,
+                    selectedId === persona.id && styles.selectedCardTitle
+                  ]}>
+                    {persona.title}
+                  </ThemedText>
+                </View>
+                <ThemedText style={[
+                  styles.cardDescription,
+                  selectedId === persona.id && styles.selectedCardDesc
                 ]}>
-                  {persona.title}
+                  {persona.description}
                 </ThemedText>
-              </View>
-              <ThemedText style={[
-                styles.cardDescription,
-                selectedId === persona.id && styles.selectedText
-              ]}>
-                {persona.description}
-              </ThemedText>
-            </TouchableOpacity>
-          ))}
-        </View>
-      </ScrollView>
+              </TouchableOpacity>
+            ))}
+          </View>
+        </ScrollView>
 
-      <View style={styles.footer}>
-        <TouchableOpacity
-          style={[styles.button, !selectedId && styles.disabledButton]}
-          onPress={handleContinue}
-          disabled={!selectedId}
-        >
-          <ThemedText style={styles.buttonText}>Continue</ThemedText>
-        </TouchableOpacity>
-      </View>
-    </ThemedView>
+        <View style={styles.footer}>
+          <TouchableOpacity
+            style={[styles.button, !selectedId && styles.disabledButton]}
+            onPress={handleContinue}
+            disabled={!selectedId}
+          >
+            <ThemedText style={styles.buttonText}>Start Chat</ThemedText>
+          </TouchableOpacity>
+        </View>
+      </ImageBackground>
+    </View>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
+    backgroundColor: '#000',
+  },
+  background: {
+    flex: 1,
+  },
+  overlay: {
+    ...StyleSheet.absoluteFillObject,
   },
   scrollContent: {
     padding: 24,
     paddingBottom: 100,
+    paddingTop: 60, // Give more top breathing room
   },
   header: {
-    fontSize: 28,
+    fontSize: 32,
+    fontWeight: '800',
     textAlign: 'center',
-    marginBottom: 8,
+    marginBottom: 10,
+    color: '#FFFFFF',
+    letterSpacing: 0.5,
+    textShadowColor: 'rgba(0, 0, 0, 0.5)',
+    textShadowOffset: { width: 0, height: 2 },
+    textShadowRadius: 4,
   },
   subHeader: {
-    fontSize: 16,
+    fontSize: 17,
     textAlign: 'center',
-    color: '#666',
-    marginBottom: 32,
+    color: '#E0E0E0',
+    marginBottom: 40,
+    lineHeight: 24,
+    fontWeight: '500',
+    maxWidth: '85%',
+    alignSelf: 'center',
   },
   cardsContainer: {
     gap: 16,
   },
   card: {
     padding: 20,
-    borderRadius: 16,
-    backgroundColor: '#f5f5f5',
+    borderRadius: 20,
+    backgroundColor: 'rgba(255, 255, 255, 0.85)', // Slightly more opaque for readability
     borderWidth: 2,
     borderColor: 'transparent',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 8,
+    elevation: 3,
   },
   selectedCard: {
     borderColor: '#007AFF',
-    backgroundColor: '#007AFF',
+    backgroundColor: '#fff', // White background when selected for crispness
+    shadowColor: '#007AFF',
+    shadowOpacity: 0.3,
+    shadowRadius: 12,
   },
   cardHeader: {
     flexDirection: 'row',
@@ -146,16 +182,23 @@ const styles = StyleSheet.create({
     gap: 12,
   },
   cardTitle: {
-    color: '#000000',
-    fontWeight: 'bold',
+    color: '#1a1a1a',
+    fontWeight: '800',
+    fontSize: 18,
+    letterSpacing: 0.3,
   },
   cardDescription: {
-    fontSize: 14,
-    lineHeight: 20,
-    color: '#444',
+    fontSize: 15,
+    lineHeight: 22,
+    color: '#444444',
+    fontWeight: '500',
   },
-  selectedText: {
-    color: '#fff',
+  selectedCardTitle: {
+    color: '#007AFF', // Blue text for active selection
+  },
+  selectedCardDesc: {
+    color: '#333333', // Dark text for readability on white bg
+    opacity: 0.9,
   },
   footer: {
     position: 'absolute',
@@ -163,22 +206,26 @@ const styles = StyleSheet.create({
     left: 0,
     right: 0,
     padding: 24,
-    backgroundColor: '#fff',
-    borderTopWidth: 1,
-    borderTopColor: '#eee',
+    backgroundColor: 'transparent',
   },
   button: {
     backgroundColor: '#007AFF',
-    paddingVertical: 16,
+    paddingVertical: 18,
     borderRadius: 30,
     alignItems: 'center',
+    shadowColor: '#007AFF',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.4,
+    shadowRadius: 10,
   },
   disabledButton: {
-    backgroundColor: '#ccc',
+    backgroundColor: 'rgba(204, 204, 204, 0.5)',
+    shadowOpacity: 0,
   },
   buttonText: {
     color: '#fff',
-    fontSize: 18,
+    fontSize: 19,
     fontWeight: 'bold',
+    letterSpacing: 0.5,
   },
 });
