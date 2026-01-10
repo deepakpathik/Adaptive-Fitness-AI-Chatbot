@@ -1,4 +1,5 @@
 import { Ionicons } from '@expo/vector-icons';
+import { BlurView } from 'expo-blur';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useRouter } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
@@ -50,7 +51,6 @@ export default function HomeScreen() {
         <SafeAreaView style={styles.safeArea}>
           <ScrollView contentContainerStyle={styles.content}>
 
-            {/* Header Section */}
             <View style={styles.header}>
               <View style={styles.iconContainer}>
                 <Animated.Image
@@ -68,7 +68,6 @@ export default function HomeScreen() {
               </View>
             </View>
 
-            {/* Feature Grid */}
             <View style={styles.grid}>
               <FeatureCard
                 icon="barbell-outline"
@@ -92,17 +91,14 @@ export default function HomeScreen() {
               />
             </View>
 
-            {/* Bottom Footer Section */}
             <View style={styles.bottomSection}>
-              {/* Disclaimer */}
-              <View style={styles.disclaimerContainer}>
+              <BlurView intensity={20} tint="dark" style={styles.disclaimerContainer}>
                 <Ionicons name="information-circle-outline" size={22} color="#FFD700" style={{ marginRight: 8 }} />
                 <Text style={styles.disclaimerText}>
                   Note: I’m here to help with fitness and wellness guidance only. I can’t help with medical conditions, injuries, or medications. Please reach out to a healthcare professional for those needs.
                 </Text>
-              </View>
+              </BlurView>
 
-              {/* CTA Button */}
               <TouchableOpacity
                 style={styles.buttonContainer}
                 onPress={() => router.push('/modal')}
@@ -128,17 +124,13 @@ export default function HomeScreen() {
 }
 
 const FeatureCard = ({ icon, title, desc }: { icon: any, title: string, desc: string }) => (
-  <View style={styles.card}>
-    <LinearGradient
-      colors={['rgba(255,255,255,0.1)', 'rgba(255,255,255,0.05)']}
-      style={styles.cardGradient}
-    />
+  <BlurView intensity={20} tint="light" style={styles.card}>
     <View style={styles.cardIconBox}>
       <Ionicons name={icon} size={24} color="#FFD700" />
     </View>
     <Text style={styles.cardTitle}>{title}</Text>
     <Text style={styles.cardDesc}>{desc}</Text>
-  </View>
+  </BlurView>
 );
 
 import { Text } from 'react-native'; // Import Text separately for custom styles
@@ -216,22 +208,18 @@ const styles = StyleSheet.create({
   },
   card: {
     width: '48%',
-    borderRadius: 16,
-    paddingVertical: 12, // Reduced from 20 to fit screen
-    paddingHorizontal: 10,
+    borderRadius: 18,
+    paddingVertical: 14,
+    paddingHorizontal: 12,
     overflow: 'hidden',
     borderWidth: 1,
-    borderColor: 'rgba(255,255,255,0.15)',
-    backgroundColor: 'rgba(255,255,255,0.03)',
+    borderColor: 'rgba(255,255,255,0.2)', // Sharper border for glass edge
+    backgroundColor: 'transparent', // BlurView handles background
     justifyContent: 'center',
   },
-  cardGradient: {
-    ...StyleSheet.absoluteFillObject,
-    opacity: 0.8,
-  },
   cardIconBox: {
-    marginBottom: 6,
-    backgroundColor: 'rgba(255,215,0,0.1)',
+    marginBottom: 8,
+    backgroundColor: 'rgba(255,215,0,0.15)',
     alignSelf: 'flex-start',
     padding: 6,
     borderRadius: 10,
@@ -240,13 +228,13 @@ const styles = StyleSheet.create({
     fontSize: 13,
     fontWeight: '700',
     color: '#FFF',
-    marginBottom: 2,
+    marginBottom: 3,
     letterSpacing: 0.3,
   },
   cardDesc: {
     fontSize: 11,
-    color: '#CCCCCC',
-    lineHeight: 14,
+    color: '#EEE', // Slightly brighter
+    lineHeight: 15,
     fontWeight: '400',
   },
   bottomSection: {
@@ -256,12 +244,12 @@ const styles = StyleSheet.create({
   },
   disclaimerContainer: {
     flexDirection: 'row',
-    backgroundColor: 'rgba(0,0,0,0.4)',
-    padding: 8, // Reduced padding
+    padding: 10,
     borderRadius: 12,
     alignItems: 'center',
     borderWidth: 1,
-    borderColor: 'rgba(255,255,255,0.05)',
+    borderColor: 'rgba(255,255,255,0.1)',
+    overflow: 'hidden', // Required for BlurView
   },
   disclaimerText: {
     color: '#FFD700',

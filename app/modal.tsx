@@ -2,6 +2,7 @@
 import { ThemedText } from '@/components/themed-text';
 import { IconSymbol } from '@/components/ui/icon-symbol';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { BlurView } from 'expo-blur';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useRouter } from 'expo-router';
 import { useState } from 'react';
@@ -36,14 +37,12 @@ export default function OnboardingScreen() {
     if (selectedId) {
       try {
         await AsyncStorage.setItem('userPersonality', selectedId);
-
         await AsyncStorage.setItem('usageDays', '1');
         await AsyncStorage.setItem('lifestyleData', JSON.stringify({
           steps: 4200,
           exerciseMinutes: 25,
           sleepHours: 5.5
         }));
-
         router.push('/(tabs)/explore');
       } catch (e) {
         console.error("Failed to save data", e);
@@ -72,31 +71,37 @@ export default function OnboardingScreen() {
             {PERSONALITIES.map((persona) => (
               <TouchableOpacity
                 key={persona.id}
-                style={[
-                  styles.card,
-                  selectedId === persona.id && styles.selectedCard,
-                ]}
                 onPress={() => setSelectedId(persona.id)}
+                activeOpacity={0.8}
               >
-                <View style={styles.cardHeader}>
-                  <IconSymbol
-                    name={persona.icon as any}
-                    size={28}
-                    color={selectedId === persona.id ? '#007AFF' : '#555'}
-                  />
-                  <ThemedText type="subtitle" style={[
-                    styles.cardTitle,
-                    selectedId === persona.id && styles.selectedCardTitle
+                <BlurView
+                  intensity={selectedId === persona.id ? 60 : 20}
+                  tint={selectedId === persona.id ? 'systemThinMaterialLight' : 'dark'}
+                  style={[
+                    styles.card,
+                    selectedId === persona.id && styles.selectedCard,
+                  ]}
+                >
+                  <View style={styles.cardHeader}>
+                    <IconSymbol
+                      name={persona.icon as any}
+                      size={28}
+                      color={selectedId === persona.id ? '#007AFF' : '#EEE'}
+                    />
+                    <ThemedText type="subtitle" style={[
+                      styles.cardTitle,
+                      selectedId === persona.id && styles.selectedCardTitle
+                    ]}>
+                      {persona.title}
+                    </ThemedText>
+                  </View>
+                  <ThemedText style={[
+                    styles.cardDescription,
+                    selectedId === persona.id && styles.selectedCardDesc
                   ]}>
-                    {persona.title}
+                    {persona.description}
                   </ThemedText>
-                </View>
-                <ThemedText style={[
-                  styles.cardDescription,
-                  selectedId === persona.id && styles.selectedCardDesc
-                ]}>
-                  {persona.description}
-                </ThemedText>
+                </BlurView>
               </TouchableOpacity>
             ))}
           </View>
@@ -130,7 +135,7 @@ const styles = StyleSheet.create({
   scrollContent: {
     padding: 24,
     paddingBottom: 100,
-    paddingTop: 60, // Give more top breathing room
+    paddingTop: 60,
   },
   header: {
     fontSize: 32,
@@ -159,21 +164,15 @@ const styles = StyleSheet.create({
   card: {
     padding: 20,
     borderRadius: 20,
-    backgroundColor: 'rgba(255, 255, 255, 0.85)', // Slightly more opaque for readability
-    borderWidth: 2,
-    borderColor: 'transparent',
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 8,
-    elevation: 3,
+    backgroundColor: 'transparent',
+    borderWidth: 1.5,
+    borderColor: 'rgba(255,255,255,0.2)',
+    overflow: 'hidden',
   },
   selectedCard: {
     borderColor: '#007AFF',
-    backgroundColor: '#fff', // White background when selected for crispness
-    shadowColor: '#007AFF',
-    shadowOpacity: 0.3,
-    shadowRadius: 12,
+    borderWidth: 2,
+    backgroundColor: 'rgba(255,255,255,0.85)',
   },
   cardHeader: {
     flexDirection: 'row',
@@ -182,7 +181,7 @@ const styles = StyleSheet.create({
     gap: 12,
   },
   cardTitle: {
-    color: '#1a1a1a',
+    color: '#FFFFFF',
     fontWeight: '800',
     fontSize: 18,
     letterSpacing: 0.3,
@@ -190,15 +189,15 @@ const styles = StyleSheet.create({
   cardDescription: {
     fontSize: 15,
     lineHeight: 22,
-    color: '#444444',
+    color: '#E0E0E0',
     fontWeight: '500',
   },
   selectedCardTitle: {
-    color: '#007AFF', // Blue text for active selection
+    color: '#007AFF',
   },
   selectedCardDesc: {
-    color: '#333333', // Dark text for readability on white bg
-    opacity: 0.9,
+    color: '#333333',
+    opacity: 1,
   },
   footer: {
     position: 'absolute',
@@ -219,7 +218,7 @@ const styles = StyleSheet.create({
     shadowRadius: 10,
   },
   disabledButton: {
-    backgroundColor: 'rgba(204, 204, 204, 0.5)',
+    backgroundColor: 'rgba(255, 255, 255, 0.2)',
     shadowOpacity: 0,
   },
   buttonText: {
