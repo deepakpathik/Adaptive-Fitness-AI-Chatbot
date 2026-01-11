@@ -46,7 +46,7 @@ This project demonstrates:
 *   PostgreSQL (Neon)
 
 ### AI
-*   LLM via backend (LangChain-based service)
+*   LLM via backend (Gemini - chosen over OpenAI for free tier availability)
 *   Context-aware prompt composition
 *   Safety-first system prompts
 
@@ -126,7 +126,7 @@ The chatbot considers basic lifestyle signals:
 *   Used to subtly influence tone and suggestions
 
 ### 5.4 Prompt Composition Requirement (Mandatory)
-Every request sent to OpenAI/Gemini must combine:
+Every request sent to the AI (Gemini) must combine:
 
 `User Personality` + `Usage Duration Behavior` + `Movement Data` + `Sleep Data` + `User Question`
 
@@ -170,14 +170,34 @@ The chatbot politely refuses queries involving:
 
 ```
 Adaptive-Fitness-AI-Chatbot/
-├── app/                  # Expo frontend
-├── backend/              # Node.js + Express backend
+├── app/                  # Expo Router (Frontend)
+│   ├── (tabs)/
+│   ├── _layout.tsx
+│   ├── chat.tsx          # Main Chat Interface
+│   ├── history.tsx       # Chat History Screen
+│   └── modal.tsx         # Coach Selection Modal
+├── backend/              # Node.js + Express + Prisma (Backend)
 │   ├── prisma/
-│   └── src/
+│   │   ├── migrations/
+│   │   └── schema.prisma # Database Schema
+│   ├── src/
+│   │   ├── routes/       # API Routes
+│   │   └── services/     # AI Logic & LangChain Service
+│   ├── index.js          # Entry Point
+│   └── vercel.json       # Deployment Config
+├── components/           # Reusable UI Components
+│   └── ui/
 ├── constants/
-├── services/
-├── README.md
-├── AI_README.md
+├── hooks/                # Custom React Hooks
+├── scripts/
+├── services/             # Frontend Services
+│   └── api.ts            # API Client (Axios)
+├── assets/               # Images & Static Assets
+├── .env                  # Frontend Environment Variables
+├── README.md             # Project Documentation
+├── AI_README.md          # AI Specific Documentation
+├── app.json              # Expo Configuration
+└── eas.json              # EAS Build Configuration
 ```
 
 ## 🔐 Environment Variables

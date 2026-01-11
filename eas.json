@@ -15,6 +15,9 @@
       "autoIncrement": true
     },
     "apk": {
+      "env": {
+        "EXPO_PUBLIC_API_URL": "https://adaptive-fitness-ai-chatbot.vercel.app/api"
+      },
       "android": {
         "buildType": "apk"
       }
