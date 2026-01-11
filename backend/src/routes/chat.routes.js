@@ -85,8 +85,40 @@ router.post('/', async (req, res) => {
             coins: updatedUser.coins
         });
 
+        // Cleanup: Keep only the last 20 messages for this user
+        const oldMessages = await prisma.message.findMany({
+            where: { userId },
+            orderBy: { createdAt: 'desc' },
+            skip: 20,
+            select: { id: true }
+        });
+
+        if (oldMessages.length > 0) {
+            const idsToDelete = oldMessages.map(m => m.id);
+            await prisma.message.deleteMany({
+                where: {
+                    id: { in: idsToDelete }
+                }
+            });
+        }
+
     } catch (error) {
         console.error('Error in chat endpoint:', error);
+        res.status(500).json({ error: 'Internal Server Error' });
+    }
+});
+
+router.get('/history/:userId', async (req, res) => {
+    try {
+        const { userId } = req.params;
+        const messages = await prisma.message.findMany({
+            where: { userId },
+            orderBy: { createdAt: 'desc' },
+            take: 20,
+        });
+        res.json(messages.reverse()); // Return oldest first for chat UI
+    } catch (error) {
+        console.error('Error fetching history:', error);
         res.status(500).json({ error: 'Internal Server Error' });
     }
 });

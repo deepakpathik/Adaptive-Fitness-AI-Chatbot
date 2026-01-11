@@ -1,13 +1,29 @@
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import axios from 'axios';
 import Constants from 'expo-constants';
 
+export const getUserId = async (): Promise<string> => {
+    try {
+        let distinctId = await AsyncStorage.getItem('distinctId');
+        if (!distinctId) {
+            distinctId = 'user-' + Date.now().toString(36) + '-' + Math.random().toString(36).substring(2, 9);
+            await AsyncStorage.setItem('distinctId', distinctId);
+        }
+        return distinctId;
+    } catch (e) {
+        return 'user-' + Date.now().toString(36);
+    }
+};
+
 const getBaseUrl = () => {
-    // Dynamically get the IP address of your computer from Expo
+    if (process.env.EXPO_PUBLIC_API_URL) {
+        return process.env.EXPO_PUBLIC_API_URL;
+    }
+
     const debuggerHost = Constants.expoConfig?.hostUri;
     const localhost = debuggerHost?.split(':')[0];
 
     if (!localhost) {
-        // Fallback to localhost if we can't get the IP (e.g. valid for iOS simulator)
         return 'http://localhost:8000/api';
     }
 
@@ -31,6 +47,15 @@ export const ChatService = {
             return { reply: response.data.message, coins: response.data.coins };
         } catch (error) {
             console.error('API Error:', error);
+            throw error;
+        }
+    },
+    getHistory: async (userId: string) => {
+        try {
+            const response = await axios.get(`${BASE_URL}/chat/history/${userId}`);
+            return response.data;
+        } catch (error) {
+            console.error('API Error (History):', error);
             throw error;
         }
     }
