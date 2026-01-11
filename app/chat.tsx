@@ -231,7 +231,7 @@ export default function ChatScreen() {
             tint="dark"
             style={[styles.header, { paddingTop: insets.top + 12 }]}
           >
-            {/* Header Content */}
+
             <TouchableOpacity onPress={() => router.back()} style={styles.backButton}>
               <BlurView intensity={40} tint="light" style={styles.backButtonBlur}>
                 <Ionicons name="chevron-back" size={24} color="#FFF" />
@@ -291,8 +291,8 @@ export default function ChatScreen() {
               updateCellsBatchingPeriod={50}
             />
 
-            {/* Input Wrapper */}
-            {messages.length > 0 && ( // Just ensuring structure
+
+            {messages.length > 0 && (
               <>
                 {loading && (
                   <Animated.View entering={FadeInUp} style={styles.loadingContainer}>
@@ -304,7 +304,7 @@ export default function ChatScreen() {
                 )}
 
                 <BlurView intensity={60} tint="dark" style={[styles.inputWrapper, { paddingBottom: Math.max(insets.bottom, 16) }]}>
-                  {/* Input Content */}
+
                   <View style={styles.inputContainer}>
                     <TextInput
                       style={styles.input}
@@ -473,7 +473,7 @@ const styles = StyleSheet.create({
     color: '#FFF',
   },
   loadingContainer: {
-    paddingLeft: 52, // Align with AI bubbles (avatar width + gap)
+    paddingLeft: 52,
     marginBottom: 16,
   },
   loadingBubble: {

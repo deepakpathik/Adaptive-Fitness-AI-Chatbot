@@ -4,7 +4,7 @@ import { LinearGradient } from 'expo-linear-gradient';
 import { useRouter } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
 import React from 'react';
-import { Animated, ImageBackground, ScrollView, StyleSheet, TouchableOpacity, View } from 'react-native';
+import { Animated, ImageBackground, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 const TypewriterText = ({ text }: { text: string }) => {
@@ -16,7 +16,7 @@ const TypewriterText = ({ text }: { text: string }) => {
       const timeout = setTimeout(() => {
         setDisplayedText(prev => prev + text[currentIndex]);
         setCurrentIndex(prev => prev + 1);
-      }, 50); // Speed of typing
+      }, 50);
       return () => clearTimeout(timeout);
     }
   }, [currentIndex, text]);
@@ -152,7 +152,7 @@ const FeatureCard = ({ icon, title, desc }: { icon: any, title: string, desc: st
   </BlurView>
 );
 
-import { Text } from 'react-native'; // Import Text separately for custom styles
+
 
 const styles = StyleSheet.create({
   container: {
@@ -170,7 +170,7 @@ const styles = StyleSheet.create({
   },
   content: {
     paddingHorizontal: 20,
-    paddingTop: 10, // minimized top padding
+    paddingTop: 10,
     paddingBottom: 20,
     flexGrow: 1,
     justifyContent: 'space-between',
@@ -182,7 +182,7 @@ const styles = StyleSheet.create({
   },
   iconContainer: {
     width: '100%',
-    height: 220, // Enlarged from 160
+    height: 220,
     justifyContent: 'center',
     alignItems: 'center',
     marginBottom: 0,
@@ -190,17 +190,17 @@ const styles = StyleSheet.create({
   sprinterIcon: {
     width: '100%',
     height: '100%',
-    transform: [{ skewX: '-10deg' }], // Static "speed" skew
+    transform: [{ skewX: '-10deg' }],
   },
   textContainer: {
     alignItems: 'center',
   },
   title: {
-    fontSize: 28, // Reduced from 34 to save space
+    fontSize: 28,
     fontWeight: '900',
     color: '#FFFFFF',
     textAlign: 'center',
-    marginBottom: 12, // Increased spacing to shift subtitle down
+    marginBottom: 12,
     lineHeight: 32,
     letterSpacing: 0.5,
     textShadowColor: 'rgba(0, 0, 0, 0.5)',
@@ -208,20 +208,20 @@ const styles = StyleSheet.create({
     textShadowRadius: 4,
   },
   subtitle: {
-    fontSize: 14, // Reduced from 17
+    fontSize: 14,
     color: '#E0E0E0',
     textAlign: 'center',
     maxWidth: '95%',
     lineHeight: 20,
     fontWeight: '500',
     opacity: 0.9,
-    marginTop: 8, // Shift downwards
-    minHeight: 20, // Prevent layout jump
+    marginTop: 8,
+    minHeight: 20,
   },
   grid: {
     flexDirection: 'row',
     flexWrap: 'wrap',
-    gap: 10, // Reduced gap
+    gap: 10,
     justifyContent: 'center',
     marginBottom: 5,
     flex: 1,
@@ -234,8 +234,8 @@ const styles = StyleSheet.create({
     paddingHorizontal: 12,
     overflow: 'hidden',
     borderWidth: 1,
-    borderColor: 'rgba(255,255,255,0.2)', // Sharper border for glass edge
-    backgroundColor: 'transparent', // BlurView handles background
+    borderColor: 'rgba(255,255,255,0.2)',
+    backgroundColor: 'transparent',
     justifyContent: 'center',
   },
   cardIconBox: {
@@ -254,7 +254,7 @@ const styles = StyleSheet.create({
   },
   cardDesc: {
     fontSize: 11,
-    color: '#EEE', // Slightly brighter
+    color: '#EEE',
     lineHeight: 15,
     fontWeight: '400',
   },
@@ -270,7 +270,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     borderWidth: 1,
     borderColor: 'rgba(255,255,255,0.1)',
-    overflow: 'hidden', // Required for BlurView
+    overflow: 'hidden',
   },
   disclaimerText: {
     color: '#FFD700',

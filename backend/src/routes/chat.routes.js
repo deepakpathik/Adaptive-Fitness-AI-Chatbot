@@ -13,7 +13,7 @@ router.post('/', async (req, res) => {
             return res.status(400).json({ error: 'Missing userId or message' });
         }
 
-        // Create or update user
+
         const user = await prisma.user.upsert({
             where: { id: userId },
             update: {
@@ -28,13 +28,13 @@ router.post('/', async (req, res) => {
             },
         });
 
-        // Increment usage days and COINS
+        // Update usage stats
         const now = new Date();
         const createdAt = new Date(user.createdAt);
         const diffTime = Math.abs(now - createdAt);
         const calculatedUsageDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
 
-        // Update user coins
+
         await prisma.user.update({
             where: { id: userId },
             data: {
@@ -72,7 +72,7 @@ router.post('/', async (req, res) => {
             },
         });
 
-        // Get updated user stats for response
+
         const updatedUser = await prisma.user.findUnique({
             where: { id: userId },
             select: { coins: true }
@@ -116,7 +116,7 @@ router.get('/history/:userId', async (req, res) => {
             orderBy: { createdAt: 'desc' },
             take: 20,
         });
-        res.json(messages.reverse()); // Return oldest first for chat UI
+        res.json(messages.reverse());
     } catch (error) {
         console.error('Error fetching history:', error);
         res.status(500).json({ error: 'Internal Server Error' });
