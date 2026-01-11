@@ -112,6 +112,7 @@ export default function ChatScreen() {
   const [messages, setMessages] = useState<Message[]>([
     { id: '1', role: 'ai', content: 'Hello! I am your adaptive fitness coach. How can I help you today?' }
   ]);
+  const [coins, setCoins] = useState(0);
   const [inputText, setInputText] = useState('');
   const [loading, setLoading] = useState(false);
   const flatListRef = useRef<FlatList>(null);
@@ -136,6 +137,10 @@ export default function ChatScreen() {
       const personality = await AsyncStorage.getItem('userPersonality') || 'Encouragement Seeker';
 
       const response = await ChatService.sendMessage(distinctId, userMsg.content, lifestyle, personality);
+
+      if (response.coins !== undefined) {
+        setCoins(response.coins);
+      }
 
       const quickActionRegex = /\[\[QUICK_ACTION:(.*?)\]\]/g;
       const quickActions: string[] = [];
@@ -223,7 +228,10 @@ export default function ChatScreen() {
 
             <View style={styles.headerTitleContainer}>
               <Text style={styles.headerTitle}>Fitness Coach</Text>
-              <View style={styles.onlineBadge} />
+              <View style={styles.coinBadge}>
+                <Ionicons name="logo-bitcoin" size={14} color="#FFD700" />
+                <Text style={styles.coinText}>{coins}</Text>
+              </View>
             </View>
             <TouchableOpacity style={styles.menuButton}>
               <Ionicons name="ellipsis-horizontal" size={24} color="#FFF" />
@@ -341,14 +349,22 @@ const styles = StyleSheet.create({
     color: '#FFF',
     letterSpacing: 0.5,
   },
-  onlineBadge: {
-    width: 8,
-    height: 8,
-    borderRadius: 4,
-    backgroundColor: '#34C759',
-    shadowColor: '#34C759',
-    shadowOpacity: 0.5,
-    shadowRadius: 4,
+  coinBadge: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: 'rgba(255, 215, 0, 0.2)',
+    paddingHorizontal: 8,
+    paddingVertical: 4,
+    borderRadius: 12,
+    gap: 4,
+    marginLeft: 8,
+    borderWidth: 1,
+    borderColor: 'rgba(255, 215, 0, 0.5)',
+  },
+  coinText: {
+    color: '#FFD700',
+    fontSize: 12,
+    fontWeight: 'bold',
   },
   menuButton: {
     width: 40,

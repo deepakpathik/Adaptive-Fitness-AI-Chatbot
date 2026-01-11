@@ -28,13 +28,24 @@ router.post('/', async (req, res) => {
             },
         });
 
+        // Increment usage days and COINS
+        const now = new Date();
+        const createdAt = new Date(user.createdAt);
+        const diffTime = Math.abs(now - createdAt);
+        const calculatedUsageDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+
+        // Update user coins
+        await prisma.user.update({
+            where: { id: userId },
+            data: {
+                coins: { increment: 1 }
+            }
+        });
+
         let usageDays = req.body.usageDays;
 
         if (usageDays === undefined || usageDays === null) {
-            const now = new Date();
-            const createdAt = new Date(user.createdAt);
-            const diffTime = Math.abs(now - createdAt);
-            usageDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+            usageDays = calculatedUsageDays;
         }
 
         const context = {
@@ -61,10 +72,17 @@ router.post('/', async (req, res) => {
             },
         });
 
+        // Get updated user stats for response
+        const updatedUser = await prisma.user.findUnique({
+            where: { id: userId },
+            select: { coins: true }
+        });
+
         res.json({
             message: aiMessage.content,
             role: 'ai',
             timestamp: aiMessage.createdAt,
+            coins: updatedUser.coins
         });
 
     } catch (error) {

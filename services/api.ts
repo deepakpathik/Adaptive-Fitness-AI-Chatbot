@@ -28,7 +28,7 @@ export const ChatService = {
                 personality,
                 usageDays,
             });
-            return { reply: response.data.message };
+            return { reply: response.data.message, coins: response.data.coins };
         } catch (error) {
             console.error('API Error:', error);
             throw error;

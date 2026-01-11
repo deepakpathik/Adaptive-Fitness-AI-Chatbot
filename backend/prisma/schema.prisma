@@ -29,5 +29,6 @@ model User {
   createdAt DateTime @default(now())
   personality String? // Encouragement Seeker, Creative Explorer, Goal Finisher
   usageDays Int @default(0)
+  coins Int @default(0)
   messages Message[]
 }
