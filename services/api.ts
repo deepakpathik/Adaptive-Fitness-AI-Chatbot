@@ -1,7 +1,22 @@
 import axios from 'axios';
-import { Platform } from 'react-native';
+import Constants from 'expo-constants';
 
-const BASE_URL = Platform.OS === 'android' ? 'http://10.0.2.2:3000/api' : 'http://localhost:3000/api';
+const getBaseUrl = () => {
+    // Dynamically get the IP address of your computer from Expo
+    const debuggerHost = Constants.expoConfig?.hostUri;
+    const localhost = debuggerHost?.split(':')[0];
+
+    if (!localhost) {
+        // Fallback to localhost if we can't get the IP (e.g. valid for iOS simulator)
+        return 'http://localhost:8000/api';
+    }
+
+    return `http://${localhost}:8000/api`;
+};
+
+
+
+const BASE_URL = getBaseUrl();
 
 export const ChatService = {
     sendMessage: async (userId: string, message: string, lifestyleData?: any, personality?: string) => {

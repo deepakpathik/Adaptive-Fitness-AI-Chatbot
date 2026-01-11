@@ -7,6 +7,23 @@ import React from 'react';
 import { Animated, ImageBackground, ScrollView, StyleSheet, TouchableOpacity, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
+const TypewriterText = ({ text }: { text: string }) => {
+  const [displayedText, setDisplayedText] = React.useState('');
+  const [currentIndex, setCurrentIndex] = React.useState(0);
+
+  React.useEffect(() => {
+    if (currentIndex < text.length) {
+      const timeout = setTimeout(() => {
+        setDisplayedText(prev => prev + text[currentIndex]);
+        setCurrentIndex(prev => prev + 1);
+      }, 50); // Speed of typing
+      return () => clearTimeout(timeout);
+    }
+  }, [currentIndex, text]);
+
+  return <Text style={styles.subtitle}>{displayedText}</Text>;
+};
+
 export default function HomeScreen() {
   const router = useRouter();
 
@@ -123,22 +140,7 @@ export default function HomeScreen() {
   );
 }
 
-const TypewriterText = ({ text }: { text: string }) => {
-  const [displayedText, setDisplayedText] = React.useState('');
-  const [currentIndex, setCurrentIndex] = React.useState(0);
 
-  React.useEffect(() => {
-    if (currentIndex < text.length) {
-      const timeout = setTimeout(() => {
-        setDisplayedText(prev => prev + text[currentIndex]);
-        setCurrentIndex(prev => prev + 1);
-      }, 50); // Speed of typing
-      return () => clearTimeout(timeout);
-    }
-  }, [currentIndex, text]);
-
-  return <Text style={styles.subtitle}>{displayedText}</Text>;
-};
 
 const FeatureCard = ({ icon, title, desc }: { icon: any, title: string, desc: string }) => (
   <BlurView intensity={20} tint="light" style={styles.card}>

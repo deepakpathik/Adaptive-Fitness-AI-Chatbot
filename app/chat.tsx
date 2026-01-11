@@ -126,14 +126,11 @@ export default function ChatScreen() {
         )}
 
         {isUser ? (
-          <AnimatedLinearGradient
-            colors={['#34C759', '#30B34D']}
-            start={{ x: 0, y: 0 }}
-            end={{ x: 1, y: 1 }}
+          <AnimatedView
             style={[styles.messageBubble, styles.userBubble]}
           >
             <Text style={styles.messageText}>{item.content}</Text>
-          </AnimatedLinearGradient>
+          </AnimatedView>
         ) : (
           <AnimatedView style={[styles.messageBubble, styles.aiBubble]}>
             <Text style={styles.messageText}>{item.content}</Text>
@@ -344,10 +341,11 @@ const styles = StyleSheet.create({
     shadowRadius: 4,
   },
   userBubble: {
+    backgroundColor: 'rgba(255, 255, 255, 0.15)',
     borderBottomRightRadius: 4,
   },
   aiBubble: {
-    backgroundColor: '#FF69B4', // Pink
+    backgroundColor: 'rgba(255, 255, 255, 0.1)',
     borderBottomLeftRadius: 4,
   },
   messageText: {

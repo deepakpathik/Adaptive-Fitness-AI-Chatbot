@@ -23,6 +23,8 @@ router.post('/', async (req, res) => {
                 id: userId,
                 personality: personality || 'Encouragement Seeker',
                 usageDays: 1,
+                name: `User ${userId}`,
+                email: `${userId}@example.com`,
             },
         });
 
