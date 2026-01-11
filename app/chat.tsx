@@ -31,6 +31,81 @@ interface Message {
 const AnimatedLinearGradient = Animated.createAnimatedComponent(LinearGradient);
 const AnimatedView = Animated.createAnimatedComponent(View);
 
+const MessageItem = React.memo(({ item, index }: { item: Message, index: number }) => {
+  const isUser = item.role === 'user';
+  return (
+    <Animated.View
+      entering={FadeInDown.delay(index * 50).springify()}
+      layout={Layout.springify()}
+      style={[
+        styles.messageRow,
+        isUser ? styles.userRow : styles.aiRow
+      ]}
+    >
+      {!isUser && (
+        <View style={styles.avatarContainer}>
+          <LinearGradient
+            colors={['#FF69B4', '#FF1493']}
+            style={styles.avatar}
+          >
+            <Ionicons name="fitness" size={16} color="#FFF" />
+          </LinearGradient>
+        </View>
+      )}
+
+      {isUser ? (
+        <AnimatedView
+          style={[styles.messageBubble, styles.userBubble]}
+        >
+          <Text style={styles.messageText}>{item.content}</Text>
+        </AnimatedView>
+      ) : (
+        <AnimatedView style={[styles.messageBubble, styles.aiBubble]}>
+          <Markdown
+            style={{
+              body: { color: '#FFF', fontSize: 16, lineHeight: 22 },
+              bullet_list: { marginBottom: 8 },
+              ordered_list: { marginBottom: 8 },
+              bullet_list_icon: { color: '#FFF', marginRight: 8 },
+              table: { borderColor: 'rgba(255,255,255,0.2)', borderWidth: 1, borderRadius: 4 },
+              tr: { borderColor: 'rgba(255,255,255,0.2)', borderBottomWidth: 1 },
+              th: { borderBottomColor: 'rgba(255,255,255,0.2)', borderBottomWidth: 1, padding: 4, fontWeight: '700' },
+              td: { borderTopWidth: 0, padding: 4, fontSize: 14 },
+            }}
+          >
+            {item.content}
+          </Markdown>
+
+          {item.quickActions && item.quickActions.length > 0 && (
+            <View style={styles.quickActionsContainer}>
+              {item.quickActions.map((action, actionIndex) => (
+                <View key={actionIndex} style={styles.quickActionPill}>
+                  <Text style={styles.quickActionText}>{action}</Text>
+                </View>
+              ))}
+            </View>
+          )}
+        </AnimatedView>
+      )}
+
+      {isUser && (
+        <View style={styles.avatarContainer}>
+          <LinearGradient
+            colors={['#007AFF', '#0056D2']}
+            style={styles.avatar}
+          >
+            <Ionicons name="person" size={16} color="#FFF" />
+          </LinearGradient>
+        </View>
+      )}
+    </Animated.View>
+  );
+}, (prevProps, nextProps) => {
+  return prevProps.item.id === nextProps.item.id &&
+    prevProps.item.content === nextProps.item.content &&
+    prevProps.item.role === nextProps.item.role;
+});
+
 export default function ChatScreen() {
   const router = useRouter();
   const insets = useSafeAreaInsets();
@@ -41,13 +116,14 @@ export default function ChatScreen() {
   const [loading, setLoading] = useState(false);
   const flatListRef = useRef<FlatList>(null);
 
-  const sendMessage = async () => {
-    if (!inputText.trim()) return;
+  const sendMessage = async (text?: string) => {
+    const contentToSend = (typeof text === 'string' ? text : null) || inputText;
+    if (!contentToSend.trim()) return;
 
     const userMsg: Message = {
       id: Date.now().toString(),
       role: 'user',
-      content: inputText.trim(),
+      content: contentToSend.trim(),
     };
 
     setMessages(prev => [...prev, userMsg]);
@@ -57,11 +133,10 @@ export default function ChatScreen() {
     try {
       const distinctId = await getOrCreateDistinctId();
       const lifestyle = await getLifestyleData();
-      const personality = await AsyncStorage.getItem('userPersonality') || 'Encouragement Seeker'; // Default fall back
+      const personality = await AsyncStorage.getItem('userPersonality') || 'Encouragement Seeker';
 
       const response = await ChatService.sendMessage(distinctId, userMsg.content, lifestyle, personality);
 
-      // Parse Quick Actions
       const quickActionRegex = /\[\[QUICK_ACTION:(.*?)\]\]/g;
       const quickActions: string[] = [];
       let cleanContent = response.reply;
@@ -70,7 +145,6 @@ export default function ChatScreen() {
       while ((match = quickActionRegex.exec(response.reply)) !== null) {
         quickActions.push(match[1]);
       }
-      // Remove tags from content
       cleanContent = cleanContent.replace(quickActionRegex, '').trim();
 
       const aiMsg: Message = {
@@ -119,83 +193,9 @@ export default function ChatScreen() {
     setTimeout(() => flatListRef.current?.scrollToEnd({ animated: true }), 100);
   }, [messages]);
 
-  const renderMessage = ({ item, index }: { item: Message, index: number }) => {
-    const isUser = item.role === 'user';
-    return (
-      <Animated.View
-        entering={FadeInDown.delay(index * 50).springify()}
-        layout={Layout.springify()}
-        style={[
-          styles.messageRow,
-          isUser ? styles.userRow : styles.aiRow
-        ]}
-      >
-        {!isUser && (
-          <View style={styles.avatarContainer}>
-            <LinearGradient
-              colors={['#FF69B4', '#FF1493']}
-              style={styles.avatar}
-            >
-              <Ionicons name="fitness" size={16} color="#FFF" />
-            </LinearGradient>
-          </View>
-        )}
-
-        {isUser ? (
-          <AnimatedView
-            style={[styles.messageBubble, styles.userBubble]}
-          >
-            <Text style={styles.messageText}>{item.content}</Text>
-          </AnimatedView>
-        ) : (
-          <AnimatedView style={[styles.messageBubble, styles.aiBubble]}>
-            <Markdown
-              style={{
-                body: { color: '#FFF', fontSize: 16, lineHeight: 22 },
-                bullet_list: { marginBottom: 8 },
-                ordered_list: { marginBottom: 8 },
-                bullet_list_icon: { color: '#FFF', marginRight: 8 },
-                table: { borderColor: 'rgba(255,255,255,0.2)' },
-                tr: { borderColor: 'rgba(255,255,255,0.2)' },
-                th: { borderBottomColor: 'rgba(255,255,255,0.2)' },
-                td: { borderTopWidth: 0 },
-              }}
-            >
-              {item.content}
-            </Markdown>
-
-            {item.quickActions && item.quickActions.length > 0 && (
-              <View style={styles.quickActionsContainer}>
-                {item.quickActions.map((action, actionIndex) => (
-                  <TouchableOpacity
-                    key={actionIndex}
-                    style={styles.quickActionPill}
-                    onPress={() => {
-                      setInputText(action);
-                      // Optional: Auto-send or just populate input
-                    }}
-                  >
-                    <Text style={styles.quickActionText}>{action}</Text>
-                  </TouchableOpacity>
-                ))}
-              </View>
-            )}
-          </AnimatedView>
-        )}
-
-        {isUser && (
-          <View style={styles.avatarContainer}>
-            <LinearGradient
-              colors={['#007AFF', '#0056D2']}
-              style={styles.avatar}
-            >
-              <Ionicons name="person" size={16} color="#FFF" />
-            </LinearGradient>
-          </View>
-        )}
-      </Animated.View>
-    );
-  };
+  const renderItem = ({ item, index }: { item: Message, index: number }) => (
+    <MessageItem item={item} index={index} />
+  );
 
   return (
     <View style={styles.container}>
@@ -233,16 +233,21 @@ export default function ChatScreen() {
           <KeyboardAvoidingView
             style={styles.keyboardContainer}
             behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-            keyboardVerticalOffset={Platform.OS === 'ios' ? 0 : 0} // offset might need adjustment since we removed SafeAreaView
+            keyboardVerticalOffset={Platform.OS === 'ios' ? 0 : 0}
           >
             <FlatList
               ref={flatListRef}
               data={messages}
               keyExtractor={item => item.id}
-              renderItem={renderMessage}
-              contentContainerStyle={[styles.chatListContent, { paddingBottom: insets.bottom + 20 }]} // Add bottom padding here
+              renderItem={renderItem}
+              contentContainerStyle={[styles.chatListContent, { paddingBottom: insets.bottom + 20 }]}
               keyboardShouldPersistTaps="handled"
               showsVerticalScrollIndicator={false}
+              initialNumToRender={15}
+              maxToRenderPerBatch={10}
+              windowSize={11}
+              removeClippedSubviews={true}
+              updateCellsBatchingPeriod={50}
             />
 
             {/* Input Wrapper */}
@@ -271,7 +276,7 @@ export default function ChatScreen() {
                     />
                     <TouchableOpacity
                       style={[styles.sendButton, (!inputText.trim() || loading) && styles.disabledSend]}
-                      onPress={sendMessage}
+                      onPress={() => sendMessage()}
                       disabled={!inputText.trim() || loading}
                     >
                       <LinearGradient

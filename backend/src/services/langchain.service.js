@@ -82,7 +82,9 @@ async function generateResponse(userId, userMessage, context) {
       Your goal is to help the user with fitness and wellness.
       
       RESPONSE CONFIGURATION:
-      1. Structure: Use Markdown tables for plans (Day | Workout | Duration). Use bullet points for lists.
+      1. Structure: Use Markdown tables for plans. STRICTLY 3 columns: | Day | Activity | Duration |.
+         - Keep cell content VERY concise (short phrases).
+         - NO HTML tags (like <br>). Use separating characters like "/" or "," for multiple items.
       2. Quick Actions: At the VERY END of your response, strictly output a list of up to 3 short follow-up suggestions in this exact format:
          [[QUICK_ACTION:Suggest Warmup]]
          [[QUICK_ACTION:Diet Tips]]
