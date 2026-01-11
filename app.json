@@ -1,7 +1,7 @@
 {
   "expo": {
     "name": "fitness-chatbot-starter",
-    "slug": "fitness-chatbot-starter",
+    "slug": "fitness-ai-chatbot",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
@@ -21,7 +21,8 @@
       "softwareKeyboardLayoutMode": "resize",
       "edgeToEdgeEnabled": false,
       "predictiveBackGestureEnabled": false,
-      "usesCleartextTraffic": true
+      "usesCleartextTraffic": true,
+      "package": "com.deepakpathik.fitnessaichatbot"
     },
     "web": {
       "output": "static",
@@ -45,6 +46,13 @@
     "experiments": {
       "typedRoutes": true,
       "reactCompiler": true
-    }
+    },
+    "extra": {
+      "router": {},
+      "eas": {
+        "projectId": "e9b90124-18ea-4dca-b6a8-1edaf201b910"
+      }
+    },
+    "owner": "deepakpathik"
   }
 }
