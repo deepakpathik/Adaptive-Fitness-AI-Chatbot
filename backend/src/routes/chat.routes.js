@@ -43,6 +43,8 @@ router.post('/', async (req, res) => {
             lifestyle: lifestyle || {},
         };
 
+        console.log(`[Context] User: ${userId} | Personality: ${context.personality} | Usage: ${context.usageDays}d | Lifestyle:`, context.lifestyle);
+
         const aiResponseContent = await generateResponse(userId, message, context);
 
         await prisma.message.create({
