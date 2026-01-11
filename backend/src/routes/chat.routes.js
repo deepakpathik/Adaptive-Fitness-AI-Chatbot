@@ -28,14 +28,18 @@ router.post('/', async (req, res) => {
             },
         });
 
-        const now = new Date();
-        const createdAt = new Date(user.createdAt);
-        const diffTime = Math.abs(now - createdAt);
-        const usageDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+        let usageDays = req.body.usageDays; // Allow override for demo/testing
+
+        if (usageDays === undefined || usageDays === null) {
+            const now = new Date();
+            const createdAt = new Date(user.createdAt);
+            const diffTime = Math.abs(now - createdAt);
+            usageDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+        }
 
         const context = {
             personality: user.personality,
-            usageDays: usageDays,
+            usageDays: Number(usageDays),
             lifestyle: lifestyle || {},
         };
 

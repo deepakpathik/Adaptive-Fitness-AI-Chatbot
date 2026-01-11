@@ -19,13 +19,14 @@ const getBaseUrl = () => {
 const BASE_URL = getBaseUrl();
 
 export const ChatService = {
-    sendMessage: async (userId: string, message: string, lifestyleData?: any, personality?: string) => {
+    sendMessage: async (userId: string, message: string, lifestyleData?: any, personality?: string, usageDays?: number) => {
         try {
             const response = await axios.post(`${BASE_URL}/chat`, {
                 userId,
                 message,
                 lifestyle: lifestyleData,
-                personality, // Pass personality to create user if needed
+                personality,
+                usageDays,
             });
             return { reply: response.data.message };
         } catch (error) {
