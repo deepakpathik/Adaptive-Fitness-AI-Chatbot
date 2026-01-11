@@ -228,13 +228,10 @@ export default function ChatScreen() {
 
             <View style={styles.headerTitleContainer}>
               <Text style={styles.headerTitle}>Fitness Coach</Text>
-              <View style={styles.coinBadge}>
-                <Ionicons name="logo-bitcoin" size={14} color="#FFD700" />
-                <Text style={styles.coinText}>{coins}</Text>
-              </View>
             </View>
-            <TouchableOpacity style={styles.menuButton}>
-              <Ionicons name="ellipsis-horizontal" size={24} color="#FFF" />
+            <TouchableOpacity style={styles.coinBadge}>
+              <Ionicons name="logo-bitcoin" size={14} color="#FFD700" />
+              <Text style={styles.coinText}>{coins}</Text>
             </TouchableOpacity>
           </BlurView>
 
@@ -357,7 +354,6 @@ const styles = StyleSheet.create({
     paddingVertical: 4,
     borderRadius: 12,
     gap: 4,
-    marginLeft: 8,
     borderWidth: 1,
     borderColor: 'rgba(255, 215, 0, 0.5)',
   },
@@ -366,12 +362,7 @@ const styles = StyleSheet.create({
     fontSize: 12,
     fontWeight: 'bold',
   },
-  menuButton: {
-    width: 40,
-    height: 40,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
+
   keyboardContainer: {
     flex: 1,
   },
