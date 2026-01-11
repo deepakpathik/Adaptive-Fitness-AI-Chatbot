@@ -148,11 +148,13 @@ export default function ChatScreen() {
       const distinctId = userId || await getUserId();
       const lifestyle = await getLifestyleData();
       const personalityId = await AsyncStorage.getItem('userPersonality') || 'Encouragement Seeker';
+      const storedUsageDays = await AsyncStorage.getItem('usageDays');
+      const usageDays = storedUsageDays ? parseInt(storedUsageDays, 10) : 1;
 
       const selectedPersona = PERSONALITIES.find(p => p.id === personalityId) || PERSONALITIES[0];
       setPersonality(selectedPersona);
 
-      const response = await ChatService.sendMessage(distinctId, userMsg.content, lifestyle, personalityId);
+      const response = await ChatService.sendMessage(distinctId, userMsg.content, lifestyle, personalityId, usageDays);
 
       if (response.coins !== undefined) {
         setCoins(response.coins);

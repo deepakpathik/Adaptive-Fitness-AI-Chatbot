@@ -101,14 +101,14 @@ The AI tone changes based on the selected personality.
     *   *Encouragement Seeker* → empathetic, reassuring, no harsh criticism
     *   *Goal Finisher* → direct, checklist-based, actionable
 
-### 5.2 Usage Duration–Based Coaching Style
-The AI adapts based on days using the app:
+### 5.2 Usage Duration–Based Coaching Style (Mandatory)
+AI tone changes based on how many days the user has been using the app:
 
 | Days Using App | AI Behavior |
 | :--- | :--- |
-| **0–3 days** | Grounded, empathetic, allows venting |
-| **4–8 days** | Friendly listener, light suggestions |
-| **9+ days** | Coach-like, direct actionable guidance |
+| **0–3 days** | **Grounded, empathetic.** Allow venting. No instant remedies unless asked. Focus on listening. |
+| **4–8 days** | **Friendly listener.** Provide short remedies only after 2 messages. |
+| **9+ days** | **Coach-like.** Provide actionable guidance immediately. Direct and goal-oriented. |
 
 **🔧 Demo Override**: An optional usageDays override allows instant demo of long-term behavior without waiting days.
 
@@ -125,16 +125,20 @@ The chatbot considers basic lifestyle signals:
 *   Sent with every chat request
 *   Used to subtly influence tone and suggestions
 
-### 5.4 Prompt Composition Strategy
-Every backend AI request combines:
-1.  Personality instruction
-2.  Usage-duration coaching style
-3.  Lifestyle context (movement + sleep)
-4.  Safety & scope guardrails
-5.  Recent chat history
-6.  User question
+### 5.4 Prompt Composition Requirement (Mandatory)
+Every request sent to OpenAI/Gemini must combine:
 
-This ensures consistent, explainable, and adaptive behavior.
+`User Personality` + `Usage Duration Behavior` + `Movement Data` + `Sleep Data` + `User Question`
+
+**How prompts are composed:**
+The backend constructs a system prompt dynamically by injecting:
+1.  **Personality Role**: (e.g., "You are an Encouragement Seeker coach...")
+2.  **Usage Duration Tone**: (e.g., "Usage Duration: 0-3 days. Focus on listening.")
+3.  **Lifestyle Data**: (e.g., "Steps: 4200, Sleep: 5.5h")
+4.  **Safety Guardrails**: Strict refusal rules for medical/non-fitness topics.
+5.  **User Question**: The user's input.
+
+This composition ensures the AI behaves contextually and safely.
 
 ## 🛡️ Safety & Scope Guardrails (Mandatory)
 

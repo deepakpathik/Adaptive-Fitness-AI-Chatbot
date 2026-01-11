@@ -81,7 +81,7 @@ export default function HomeScreen() {
               </View>
               <View style={styles.textContainer}>
                 <Text style={styles.title}>Ready to Crush It,{'\n'}Athlete?</Text>
-                <TypewriterText text="Your adaptive, goal-oriented AI coach is here." />
+                <TypewriterText text="This is the Adaptive Fitness Companion Chatbot. It provides fitness and wellness guidance while clearly avoiding medical advice." />
               </View>
             </View>
 
@@ -110,9 +110,9 @@ export default function HomeScreen() {
 
             <View style={styles.bottomSection}>
               <BlurView intensity={20} tint="dark" style={styles.disclaimerContainer}>
-                <Ionicons name="information-circle-outline" size={22} color="#FFD700" style={{ marginRight: 8 }} />
+                <Ionicons name="alert-circle-outline" size={22} color="#FFD700" style={{ marginRight: 8 }} />
                 <Text style={styles.disclaimerText}>
-                  Note: I’m here to help with fitness and wellness guidance only. I can’t help with medical conditions, injuries, or medications. Please reach out to a healthcare professional for those needs.
+                  Safety Note: This is not medical advice. Consult a professional for health concerns.
                 </Text>
               </BlurView>
 

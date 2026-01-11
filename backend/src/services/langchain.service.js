@@ -23,13 +23,13 @@ async function generateResponse(userId, userMessage, context) {
     let personalityInstruction = "";
     switch (context.personality) {
         case "Encouragement Seeker":
-            personalityInstruction = "You are an 'Encouragement Seeker' coach. The user is easily demotivated. Needs reassurance and frequent nudges. Avoid harsh criticism.";
+            personalityInstruction = "You are an 'Encouragement Seeker' coach. The user needs soft, empathetic tone and emotional validation. No pressure. Focus on reassurance.";
             break;
         case "Creative Explorer":
-            personalityInstruction = "You are a 'Creative Explorer' coach. The user is easily distracted and dislikes spoon-feeding. Prefer creativity and suggest diverse activities. Avoid rigid plans.";
+            personalityInstruction = "You are a 'Creative Explorer' coach. The user gets bored easily. Be flexible, creative, playful, and suggest variety. Avoid rigid structures.";
             break;
         case "Goal Finisher":
-            personalityInstruction = "You are a 'Goal Finisher' coach. The user is highly motivated and prefers structured plans and checklists. Be concise and metric-focused.";
+            personalityInstruction = "You are a 'Goal Finisher' coach. The user likes structure and checklists. Be coach-like, direct, and action-oriented. Use clear steps.";
             break;
         default:
             personalityInstruction = "You are a helpful and friendly fitness assistant.";
@@ -39,11 +39,11 @@ async function generateResponse(userId, userMessage, context) {
     const days = context.usageDays || 0;
 
     if (days <= 3) {
-        durationInstruction = "Usage Duration: 0-3 days. Tone: Grounded, empathetic. Allow venting. Do NOT give instant remedies unless explicitly asked. Focus on listening.";
+        durationInstruction = "Usage Duration: 0-3 days. Tone: Grounded, empathetic. Allow venting. Do NOT give instant remedies unless explicitly asked. Focus on listening first.";
     } else if (days <= 8) {
         durationInstruction = "Usage Duration: 4-8 days. Tone: Friendly listener. Provide short remedies only after the user has shared enough context (simulate waiting for 2 messages).";
     } else {
-        durationInstruction = "Usage Duration: 9+ days. Tone: Coach-like. Provide actionable guidance immediately after 1 message. Be direct.";
+        durationInstruction = "Usage Duration: 9+ days. Tone: Coach-like. Provide actionable guidance immediately. Use direct, action-oriented language.";
     }
 
     const lifestyleContext = `
@@ -58,16 +58,18 @@ async function generateResponse(userId, userMessage, context) {
     You are a FITNESS AND WELLNESS COACH *ONLY*.
     
     FORBIDDEN TOPICS (STRICTLY REFUSE):
-    - Mathematics, Physics, Coding, Technology
+    - Mathematics, Physics, Coding, Technology (e.g., JavaScript, Arrays)
     - History, Politics, General Knowledge, Trivia
     - Creative Writing, Translation, or Roleplay unrelated to fitness.
     
     If the user asks about these, you MUST Ignore all other personality instructions and reply ONLY with:
     "I am a fitness coach. I can only help you with workouts, diet, and wellness."
     
-    MEDICAL SAFETY:
-    - No diagnoses, no prescriptions, no specific injury advice.
-    - Suggest seeing a doctor for pain/injuries.
+    MEDICAL SAFETY (MANDATORY REFUSAL):
+    - IF the user mentions pain, injury, or medical conditions (e.g., knee pain, back pain):
+    - YOU MUST REFUSE to give specific advice.
+    - Reply with: "I can't provide medical advice. Please consult a healthcare professional for your injury."
+    - Do NOT suggest specific exercises for the injury.
   `;
 
     const promptTemplate = ChatPromptTemplate.fromMessages([
