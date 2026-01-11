@@ -17,13 +17,15 @@ import {
   TouchableOpacity,
   View
 } from 'react-native';
+import Markdown from 'react-native-markdown-display';
 import Animated, { FadeInDown, FadeInUp, Layout } from 'react-native-reanimated';
-import { SafeAreaView } from 'react-native-safe-area-context';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 interface Message {
   id: string;
   role: 'user' | 'ai';
   content: string;
+  quickActions?: string[];
 }
 
 const AnimatedLinearGradient = Animated.createAnimatedComponent(LinearGradient);
@@ -31,6 +33,7 @@ const AnimatedView = Animated.createAnimatedComponent(View);
 
 export default function ChatScreen() {
   const router = useRouter();
+  const insets = useSafeAreaInsets();
   const [messages, setMessages] = useState<Message[]>([
     { id: '1', role: 'ai', content: 'Hello! I am your adaptive fitness coach. How can I help you today?' }
   ]);
@@ -58,10 +61,23 @@ export default function ChatScreen() {
 
       const response = await ChatService.sendMessage(distinctId, userMsg.content, lifestyle, personality);
 
+      // Parse Quick Actions
+      const quickActionRegex = /\[\[QUICK_ACTION:(.*?)\]\]/g;
+      const quickActions: string[] = [];
+      let cleanContent = response.reply;
+      let match;
+
+      while ((match = quickActionRegex.exec(response.reply)) !== null) {
+        quickActions.push(match[1]);
+      }
+      // Remove tags from content
+      cleanContent = cleanContent.replace(quickActionRegex, '').trim();
+
       const aiMsg: Message = {
         id: (Date.now() + 1).toString(),
         role: 'ai',
-        content: response.reply,
+        content: cleanContent,
+        quickActions: quickActions.length > 0 ? quickActions : undefined,
       };
       setMessages(prev => [...prev, aiMsg]);
     } catch (error) {
@@ -133,7 +149,37 @@ export default function ChatScreen() {
           </AnimatedView>
         ) : (
           <AnimatedView style={[styles.messageBubble, styles.aiBubble]}>
-            <Text style={styles.messageText}>{item.content}</Text>
+            <Markdown
+              style={{
+                body: { color: '#FFF', fontSize: 16, lineHeight: 22 },
+                bullet_list: { marginBottom: 8 },
+                ordered_list: { marginBottom: 8 },
+                bullet_list_icon: { color: '#FFF', marginRight: 8 },
+                table: { borderColor: 'rgba(255,255,255,0.2)' },
+                tr: { borderColor: 'rgba(255,255,255,0.2)' },
+                th: { borderBottomColor: 'rgba(255,255,255,0.2)' },
+                td: { borderTopWidth: 0 },
+              }}
+            >
+              {item.content}
+            </Markdown>
+
+            {item.quickActions && item.quickActions.length > 0 && (
+              <View style={styles.quickActionsContainer}>
+                {item.quickActions.map((action, actionIndex) => (
+                  <TouchableOpacity
+                    key={actionIndex}
+                    style={styles.quickActionPill}
+                    onPress={() => {
+                      setInputText(action);
+                      // Optional: Auto-send or just populate input
+                    }}
+                  >
+                    <Text style={styles.quickActionText}>{action}</Text>
+                  </TouchableOpacity>
+                ))}
+              </View>
+            )}
           </AnimatedView>
         )}
 
@@ -162,17 +208,19 @@ export default function ChatScreen() {
           colors={['rgba(0,0,0,0.5)', 'rgba(0,0,0,0.9)']}
           style={styles.overlay}
         />
-        <SafeAreaView style={styles.safeArea} edges={['top', 'left', 'right']}>
-          <BlurView intensity={20} tint="dark" style={styles.header}>
-            <TouchableOpacity
-              onPress={() => router.back()}
-              style={styles.backButton}
-              activeOpacity={0.7}
-            >
+        <View style={{ flex: 1 }}>
+          <BlurView
+            intensity={20}
+            tint="dark"
+            style={[styles.header, { paddingTop: insets.top + 12 }]}
+          >
+            {/* Header Content */}
+            <TouchableOpacity onPress={() => router.back()} style={styles.backButton}>
               <BlurView intensity={40} tint="light" style={styles.backButtonBlur}>
                 <Ionicons name="chevron-back" size={24} color="#FFF" />
               </BlurView>
             </TouchableOpacity>
+
             <View style={styles.headerTitleContainer}>
               <Text style={styles.headerTitle}>Fitness Coach</Text>
               <View style={styles.onlineBadge} />
@@ -185,57 +233,60 @@ export default function ChatScreen() {
           <KeyboardAvoidingView
             style={styles.keyboardContainer}
             behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-            keyboardVerticalOffset={Platform.OS === 'ios' ? 90 : 0}
+            keyboardVerticalOffset={Platform.OS === 'ios' ? 0 : 0} // offset might need adjustment since we removed SafeAreaView
           >
             <FlatList
               ref={flatListRef}
               data={messages}
               keyExtractor={item => item.id}
               renderItem={renderMessage}
-              contentContainerStyle={styles.chatListContent}
+              contentContainerStyle={[styles.chatListContent, { paddingBottom: insets.bottom + 20 }]} // Add bottom padding here
               keyboardShouldPersistTaps="handled"
               showsVerticalScrollIndicator={false}
             />
 
-            {loading && (
-              <Animated.View
-                entering={FadeInUp}
-                style={styles.loadingContainer}
-              >
-                <View style={styles.loadingBubble}>
-                  <ActivityIndicator size="small" color="#FF69B4" />
-                  <Text style={styles.loadingText}>Coach is thinking...</Text>
-                </View>
-              </Animated.View>
-            )}
+            {/* Input Wrapper */}
+            {messages.length > 0 && ( // Just ensuring structure
+              <>
+                {loading && (
+                  <Animated.View entering={FadeInUp} style={styles.loadingContainer}>
+                    <View style={styles.loadingBubble}>
+                      <ActivityIndicator size="small" color="#FF69B4" />
+                      <Text style={styles.loadingText}>Coach is thinking...</Text>
+                    </View>
+                  </Animated.View>
+                )}
 
-            <BlurView intensity={60} tint="dark" style={styles.inputWrapper}>
-              <View style={styles.inputContainer}>
-                <TextInput
-                  style={styles.input}
-                  placeholder="Ask about workouts..."
-                  placeholderTextColor="#999"
-                  value={inputText}
-                  onChangeText={setInputText}
-                  multiline
-                  returnKeyType="default"
-                />
-                <TouchableOpacity
-                  style={[styles.sendButton, (!inputText.trim() || loading) && styles.disabledSend]}
-                  onPress={sendMessage}
-                  disabled={!inputText.trim() || loading}
-                >
-                  <LinearGradient
-                    colors={['#007AFF', '#0056D2']}
-                    style={styles.sendButtonGradient}
-                  >
-                    <Ionicons name="arrow-up" size={22} color="#FFF" />
-                  </LinearGradient>
-                </TouchableOpacity>
-              </View>
-            </BlurView>
+                <BlurView intensity={60} tint="dark" style={[styles.inputWrapper, { paddingBottom: Math.max(insets.bottom, 16) }]}>
+                  {/* Input Content */}
+                  <View style={styles.inputContainer}>
+                    <TextInput
+                      style={styles.input}
+                      placeholder="Ask about workouts..."
+                      placeholderTextColor="#999"
+                      value={inputText}
+                      onChangeText={setInputText}
+                      multiline
+                      returnKeyType="default"
+                    />
+                    <TouchableOpacity
+                      style={[styles.sendButton, (!inputText.trim() || loading) && styles.disabledSend]}
+                      onPress={sendMessage}
+                      disabled={!inputText.trim() || loading}
+                    >
+                      <LinearGradient
+                        colors={['#007AFF', '#0056D2']}
+                        style={styles.sendButtonGradient}
+                      >
+                        <Ionicons name="arrow-up" size={22} color="#FFF" />
+                      </LinearGradient>
+                    </TouchableOpacity>
+                  </View>
+                </BlurView>
+              </>
+            )}
           </KeyboardAvoidingView>
-        </SafeAreaView>
+        </View>
       </ImageBackground>
     </View>
   );
@@ -409,5 +460,24 @@ const styles = StyleSheet.create({
   },
   disabledSend: {
     opacity: 0.6,
+  },
+  quickActionsContainer: {
+    marginTop: 12,
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: 8,
+  },
+  quickActionPill: {
+    backgroundColor: 'rgba(255, 255, 255, 0.15)',
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    borderRadius: 16,
+    borderWidth: 1,
+    borderColor: 'rgba(255,255,255,0.2)',
+  },
+  quickActionText: {
+    color: '#E0E0E0',
+    fontSize: 12,
+    fontWeight: '500',
   },
 });

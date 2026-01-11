@@ -71,8 +71,13 @@ async function generateResponse(userId, userMessage, context) {
       ${medicalGuardrail}
 
       Your goal is to help the user with fitness and wellness.
-      Keep responses structured and readable (use Markdown, bullet points, or tables if appropriate).
-
+      
+      RESPONSE CONFIGURATION:
+      1. Structure: Use Markdown tables for plans (Day | Workout | Duration). Use bullet points for lists.
+      2. Quick Actions: At the VERY END of your response, strictly output a list of up to 3 short follow-up suggestions in this exact format:
+         [[QUICK_ACTION:Suggest Warmup]]
+         [[QUICK_ACTION:Diet Tips]]
+      
       Here is the recent conversation history for context:
       ${chatHistory}
     `],
