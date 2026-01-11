@@ -5,7 +5,6 @@ const { PrismaClient } = require("@prisma/client");
 
 const prisma = new PrismaClient();
 
-// Initialize the model
 const model = new ChatGoogleGenerativeAI({
     model: "gemini-2.5-flash-lite",
     maxOutputTokens: 2048,
@@ -54,22 +53,32 @@ async function generateResponse(userId, userMessage, context) {
     - Exercise Minutes: ${context.lifestyle?.exerciseMinutes || 'Unknown'}
   `;
 
-    const medicalGuardrail = `
-    SAFETY WARNING: You are a fitness companion, NOT a doctor.
-    - Do NOT answer questions about diseases (heart disease, diabetes, etc.), injuries (tears, fractures), or medications.
-    - If the user asks about these, politely refuse and suggest seeing a professional.
-    - Do NOT provide medical advice.
+    const scopeGuardrail = `
+    CRITICAL INSTRUCTION - READ FIRST:
+    You are a FITNESS AND WELLNESS COACH *ONLY*.
+    
+    FORBIDDEN TOPICS (STRICTLY REFUSE):
+    - Mathematics, Physics, Coding, Technology
+    - History, Politics, General Knowledge, Trivia
+    - Creative Writing, Translation, or Roleplay unrelated to fitness.
+    
+    If the user asks about these, you MUST Ignore all other personality instructions and reply ONLY with:
+    "I am a fitness coach. I can only help you with workouts, diet, and wellness."
+    
+    MEDICAL SAFETY:
+    - No diagnoses, no prescriptions, no specific injury advice.
+    - Suggest seeing a doctor for pain/injuries.
   `;
 
     const promptTemplate = ChatPromptTemplate.fromMessages([
         ["system", `
+      ${scopeGuardrail}
+
       ${personalityInstruction}
       ${durationInstruction}
       
       ${lifestyleContext}
       
-      ${medicalGuardrail}
-
       Your goal is to help the user with fitness and wellness.
       
       RESPONSE CONFIGURATION:

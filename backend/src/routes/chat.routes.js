@@ -13,11 +13,11 @@ router.post('/', async (req, res) => {
             return res.status(400).json({ error: 'Missing userId or message' });
         }
 
-        // Upsert user to ensure they exist and have the latest personality
+        // Create or update user
         const user = await prisma.user.upsert({
             where: { id: userId },
             update: {
-                personality: personality || undefined, // Update personality if provided
+                personality: personality || undefined,
             },
             create: {
                 id: userId,
@@ -28,7 +28,7 @@ router.post('/', async (req, res) => {
             },
         });
 
-        let usageDays = req.body.usageDays; // Allow override for demo/testing
+        let usageDays = req.body.usageDays;
 
         if (usageDays === undefined || usageDays === null) {
             const now = new Date();
@@ -42,8 +42,6 @@ router.post('/', async (req, res) => {
             usageDays: Number(usageDays),
             lifestyle: lifestyle || {},
         };
-
-        console.log(`[Context] User: ${userId} | Personality: ${context.personality} | Usage: ${context.usageDays}d | Lifestyle:`, context.lifestyle);
 
         const aiResponseContent = await generateResponse(userId, message, context);
 
