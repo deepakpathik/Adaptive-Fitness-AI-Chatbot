@@ -222,7 +222,9 @@ npx expo start
 ```
 *Backend runs independently and is already deployed.*
 
-## 🎥 Demo Video (Mandatory)
+## 🎥 Demo Video & APK Download
+
+**[📂 Download Android APK & Watch Demo Video](https://drive.google.com/drive/folders/1HGuGNM-6YPerYkfvLmlv-DI29738qHqQ?usp=sharing)**
 
 The demo showcases:
 *   Welcome screen & safety disclaimer
