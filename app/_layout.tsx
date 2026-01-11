@@ -18,6 +18,7 @@ export default function RootLayout() {
         <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
         <Stack.Screen name="modal" options={{ presentation: 'fullScreenModal', headerShown: false }} />
         <Stack.Screen name="chat" options={{ presentation: 'fullScreenModal', headerShown: false }} />
+        <Stack.Screen name="history" options={{ presentation: 'fullScreenModal', headerShown: false }} />
       </Stack>
       <StatusBar style="auto" />
     </ThemeProvider>

@@ -1,4 +1,5 @@
-import { ChatService } from '@/services/api';
+import { PERSONALITIES } from '@/constants/personalities';
+import { ChatService, getUserId } from '@/services/api';
 import { Ionicons } from '@expo/vector-icons';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { BlurView } from 'expo-blur';
@@ -31,8 +32,10 @@ interface Message {
 const AnimatedLinearGradient = Animated.createAnimatedComponent(LinearGradient);
 const AnimatedView = Animated.createAnimatedComponent(View);
 
-const MessageItem = React.memo(({ item, index }: { item: Message, index: number }) => {
+const MessageItem = React.memo(({ item, index, personality }: { item: Message, index: number, personality: any }) => {
   const isUser = item.role === 'user';
+  const currentPersona = personality || PERSONALITIES[0];
+
   return (
     <Animated.View
       entering={FadeInDown.delay(index * 50).springify()}
@@ -45,10 +48,10 @@ const MessageItem = React.memo(({ item, index }: { item: Message, index: number 
       {!isUser && (
         <View style={styles.avatarContainer}>
           <LinearGradient
-            colors={['#FF69B4', '#FF1493']}
+            colors={[currentPersona.color, currentPersona.color]}
             style={styles.avatar}
           >
-            <Ionicons name="fitness" size={16} color="#FFF" />
+            <Ionicons name={currentPersona.icon} size={16} color="#FFF" />
           </LinearGradient>
         </View>
       )}
@@ -103,7 +106,8 @@ const MessageItem = React.memo(({ item, index }: { item: Message, index: number 
 }, (prevProps, nextProps) => {
   return prevProps.item.id === nextProps.item.id &&
     prevProps.item.content === nextProps.item.content &&
-    prevProps.item.role === nextProps.item.role;
+    prevProps.item.role === nextProps.item.role &&
+    prevProps.personality?.id === nextProps.personality?.id;
 });
 
 export default function ChatScreen() {
@@ -116,7 +120,16 @@ export default function ChatScreen() {
   const [inputText, setInputText] = useState('');
   const [loading, setLoading] = useState(false);
   const flatListRef = useRef<FlatList>(null);
+  const [userId, setUserId] = useState<string>('');
+  const [personality, setPersonality] = useState(PERSONALITIES[0]);
 
+  useEffect(() => {
+    getUserId().then(id => setUserId(id));
+  }, []);
+
+  useEffect(() => {
+    setTimeout(() => flatListRef.current?.scrollToEnd({ animated: true }), 100);
+  }, [messages]);
   const sendMessage = async (text?: string) => {
     const contentToSend = (typeof text === 'string' ? text : null) || inputText;
     if (!contentToSend.trim()) return;
@@ -132,11 +145,14 @@ export default function ChatScreen() {
     setLoading(true);
 
     try {
-      const distinctId = await getOrCreateDistinctId();
+      const distinctId = userId || await getUserId();
       const lifestyle = await getLifestyleData();
-      const personality = await AsyncStorage.getItem('userPersonality') || 'Encouragement Seeker';
+      const personalityId = await AsyncStorage.getItem('userPersonality') || 'Encouragement Seeker';
 
-      const response = await ChatService.sendMessage(distinctId, userMsg.content, lifestyle, personality);
+      const selectedPersona = PERSONALITIES.find(p => p.id === personalityId) || PERSONALITIES[0];
+      setPersonality(selectedPersona);
+
+      const response = await ChatService.sendMessage(distinctId, userMsg.content, lifestyle, personalityId);
 
       if (response.coins !== undefined) {
         setCoins(response.coins);
@@ -172,18 +188,7 @@ export default function ChatScreen() {
     }
   };
 
-  const getOrCreateDistinctId = async () => {
-    try {
-      let distinctId = await AsyncStorage.getItem('distinctId');
-      if (!distinctId) {
-        distinctId = Math.random().toString(36).substring(7);
-        await AsyncStorage.setItem('distinctId', distinctId);
-      }
-      return distinctId;
-    } catch (e) {
-      return 'user-' + Date.now();
-    }
-  };
+
 
   const getLifestyleData = async () => {
     try {
@@ -198,8 +203,15 @@ export default function ChatScreen() {
     setTimeout(() => flatListRef.current?.scrollToEnd({ animated: true }), 100);
   }, [messages]);
 
+  useEffect(() => {
+    AsyncStorage.getItem('userPersonality').then(id => {
+      const p = PERSONALITIES.find(per => per.id === id) || PERSONALITIES[0];
+      setPersonality(p);
+    });
+  }, []);
+
   const renderItem = ({ item, index }: { item: Message, index: number }) => (
-    <MessageItem item={item} index={index} />
+    <MessageItem item={item} index={index} personality={personality} />
   );
 
   return (
@@ -227,12 +239,36 @@ export default function ChatScreen() {
             </TouchableOpacity>
 
             <View style={styles.headerTitleContainer}>
-              <Text style={styles.headerTitle}>Fitness Coach</Text>
+              <Text
+                style={styles.headerTitle}
+                onLongPress={() => {
+                  import('react-native').then(({ Alert, Clipboard }) => {
+                    Alert.alert(
+                      'Device ID',
+                      `Your unique Device ID is:\n${userId}`,
+                      [
+                        { text: 'Copy', onPress: () => Clipboard.setString(userId) },
+                        { text: 'OK' }
+                      ]
+                    );
+                  });
+                }}
+              >
+                Fitness Coach
+              </Text>
             </View>
-            <TouchableOpacity style={styles.coinBadge}>
-              <Ionicons name="logo-bitcoin" size={14} color="#FFD700" />
-              <Text style={styles.coinText}>{coins}</Text>
-            </TouchableOpacity>
+            <View style={styles.headerActions}>
+              <TouchableOpacity
+                style={styles.historyButton}
+                onPress={() => router.push('/history')}
+              >
+                <Ionicons name="time-outline" size={22} color="#FFF" />
+              </TouchableOpacity>
+              <TouchableOpacity style={styles.coinBadge}>
+                <Ionicons name="logo-bitcoin" size={14} color="#FFD700" />
+                <Text style={styles.coinText}>{coins}</Text>
+              </TouchableOpacity>
+            </View>
           </BlurView>
 
           <KeyboardAvoidingView
@@ -302,6 +338,8 @@ export default function ChatScreen() {
   );
 }
 
+
+
 const styles = StyleSheet.create({
   container: {
     flex: 1,
@@ -346,6 +384,19 @@ const styles = StyleSheet.create({
     color: '#FFF',
     letterSpacing: 0.5,
   },
+  headerActions: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 12,
+  },
+  historyButton: {
+    width: 32,
+    height: 32,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: 'rgba(255,255,255,0.1)',
+    borderRadius: 16,
+  },
   coinBadge: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -362,7 +413,12 @@ const styles = StyleSheet.create({
     fontSize: 12,
     fontWeight: 'bold',
   },
-
+  menuButton: {
+    width: 40,
+    height: 40,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
   keyboardContainer: {
     flex: 1,
   },
